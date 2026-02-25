@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Loader2, Mail, Lock, AlertCircle } from "lucide-react"
 
 const loginSchema = z.object({
@@ -64,74 +65,82 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-50 p-6">
-            <div className="w-full max-w-md space-y-8 bg-white p-10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-neutral-100">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-surface p-4 sm:p-6 text-primary-dark">
+            <div className="w-full max-w-sm space-y-8 bg-warm-surface p-8 sm:p-10 rounded-3xl border border-primary-dark/20 shadow-sm">
                 <div className="text-center">
-                    <h1 className="text-4xl font-black text-neutral-900 tracking-tight">Welcome Back</h1>
-                    <p className="text-neutral-500 font-medium mt-2">Sign in to manage your property</p>
+                    <h1 className="text-[32px] font-bold tracking-tight">Masuk</h1>
+                    <p className="text-base font-normal text-primary-dark/60 mt-2">Gunakan akun yang sudah terdaftar untuk melanjutkan.</p>
                 </div>
 
                 {error && (
-                    <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl animate-in fade-in slide-in-from-top-2">
+                    <div className="flex items-center gap-3 p-4 bg-red-100/50 border border-red-200 text-red-700 rounded-2xl animate-in fade-in slide-in-from-top-2">
                         <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                        <p className="text-sm font-semibold">{error}</p>
+                        <p className="text-sm font-bold">{error}</p>
                     </div>
                 )}
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-neutral-700 ml-1">Email Address</label>
+                        <label className="text-sm font-bold text-primary-dark/80 ml-1">Email</label>
                         <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-neutral-400 group-focus-within:text-neutral-900 transition-colors">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-primary-dark/30 group-focus-within:text-accent-color transition-colors">
                                 <Mail className="w-5 h-5" />
                             </div>
                             <input
                                 {...register("email")}
                                 type="email"
-                                placeholder="name@example.com"
-                                className="w-full pl-11 pr-4 py-4 bg-neutral-50 border-2 border-neutral-100 rounded-2xl focus:border-neutral-900 focus:bg-white outline-none transition-all font-medium placeholder:text-neutral-300"
+                                placeholder="nama@email.com"
+                                className="w-full pl-11 pr-4 py-4 bg-surface border border-primary-dark/25 rounded-2xl focus:ring-2 focus:ring-accent-color focus:border-accent-color outline-none transition-all font-normal placeholder:text-primary-dark/20"
                             />
                         </div>
                         {errors.email && (
-                            <p className="text-xs font-bold text-red-500 ml-1">{errors.email.message}</p>
+                            <p className="text-[12px] font-bold text-red-500 ml-1">{errors.email.message}</p>
                         )}
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-neutral-700 ml-1">Password</label>
+                        <label className="text-sm font-bold text-primary-dark/80 ml-1">Password</label>
                         <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-neutral-400 group-focus-within:text-neutral-900 transition-colors">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-primary-dark/30 group-focus-within:text-accent-color transition-colors">
                                 <Lock className="w-5 h-5" />
                             </div>
                             <input
                                 {...register("password")}
                                 type="password"
                                 placeholder="••••••••"
-                                className="w-full pl-11 pr-4 py-4 bg-neutral-50 border-2 border-neutral-100 rounded-2xl focus:border-neutral-900 focus:bg-white outline-none transition-all font-medium placeholder:text-neutral-300"
+                                className="w-full pl-11 pr-4 py-4 bg-surface border border-primary-dark/25 rounded-2xl focus:ring-2 focus:ring-accent-color focus:border-accent-color outline-none transition-all font-normal placeholder:text-primary-dark/20"
                             />
                         </div>
                         {errors.password && (
-                            <p className="text-xs font-bold text-red-500 ml-1">{errors.password.message}</p>
+                            <p className="text-[12px] font-bold text-red-500 ml-1">{errors.password.message}</p>
                         )}
                     </div>
 
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full flex items-center justify-center py-4 bg-neutral-900 text-white font-black rounded-2xl hover:bg-neutral-800 focus:ring-4 focus:ring-neutral-200 transition-all shadow-xl hover:shadow-2xl active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="w-full flex items-center justify-center py-4 bg-accent-color text-white font-bold rounded-2xl hover:brightness-110 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-md"
                     >
                         {isLoading ? (
                             <Loader2 className="w-6 h-6 animate-spin" />
                         ) : (
-                            "Sign In"
+                            "Masuk Sekarang"
                         )}
                     </button>
                 </form>
 
-                <div className="text-center pt-2">
-                    <p className="text-sm font-bold text-neutral-400">
-                        Forgot password? <span className="text-neutral-900 hover:underline cursor-pointer">Reset it</span>
+                <div className="text-center space-y-4 pt-2">
+                    <p className="text-sm font-bold text-primary-dark/40">
+                        Lupa password? <span className="text-primary-dark/60 hover:underline cursor-pointer">Hubungi pengelola.</span>
                     </p>
+                    <div className="pt-2 border-t border-primary-dark/10">
+                        <p className="text-sm font-normal text-primary-dark/60">
+                            Belum punya akun?{" "}
+                            <Link href="/signup" className="font-bold text-accent-color hover:underline">
+                                Daftar
+                            </Link>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

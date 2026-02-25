@@ -1,4 +1,4 @@
-# Prisma v7 Setup (Kos Putra Management System)
+# Prisma v7 Setup (Kos Putra Friendly Management System)
 
 This project uses Prisma v7 with a configuration-based datasource URL management.
 

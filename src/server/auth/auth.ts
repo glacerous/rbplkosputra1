@@ -1,48 +1,15 @@
-import { NextAuthOptions, getServerSession, type DefaultSession } from "next-auth"
+import "dotenv/config"
+import { NextAuthOptions, getServerSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { prisma } from "@/server/db/prisma"
+import { getPrisma } from "@/server/db/prisma"
 import bcrypt from "bcryptjs"
-import { Role } from "@prisma/client"
 
-declare module "next-auth" {
-    interface Session extends DefaultSession {
-        user: {
-            id: string
-            role: Role
-        } & DefaultSession["user"]
-    }
-
-    interface User {
-        role: Role
-    }
-}
-
-declare module "next-auth/jwt" {
-    interface JWT {
-        id: string
-        role: Role
-    }
-}
-
-/**
- * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
- */
 export const authOptions: NextAuthOptions = {
-    callbacks: {
-        jwt({ token, user }) {
-            if (user) {
-                token.id = user.id
-                token.role = user.role
-            }
-            return token
-        },
-        session({ session, token }) {
-            if (token && session.user) {
-                session.user.id = token.id;
-                session.user.role = token.role;
-            }
-            return session
-        },
+    session: {
+        strategy: "jwt",
+    },
+    pages: {
+        signIn: "/login",
     },
     providers: [
         CredentialsProvider({
@@ -56,41 +23,57 @@ export const authOptions: NextAuthOptions = {
                     return null
                 }
 
-                const user = await prisma.user.findUnique({
-                    where: { email: credentials.email },
-                })
+                try {
+                    // Always pull the current prisma instance from the singleton
+                    const db = getPrisma();
 
-                if (!user) {
+                    const user = await db.user.findUnique({
+                        where: { email: credentials.email },
+                    })
+
+                    if (!user) {
+                        return null
+                    }
+
+                    const isPasswordValid = await bcrypt.compare(
+                        credentials.password,
+                        user.passwordHash
+                    )
+
+                    if (!isPasswordValid) {
+                        return null
+                    }
+
+                    return {
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        role: user.role,
+                    }
+                } catch (error) {
+                    console.error("[AUTH] FAIL:", error)
+                    // If it failed with the connection error, we'll see it here in the logs
                     return null
-                }
-
-                const isPasswordValid = await bcrypt.compare(
-                    credentials.password,
-                    user.passwordHash
-                )
-
-                if (!isPasswordValid) {
-                    return null
-                }
-
-                return {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    role: user.role,
                 }
             },
         }),
     ],
-    pages: {
-        signIn: "/login",
-    },
-    session: {
-        strategy: "jwt",
+    callbacks: {
+        async jwt({ token, user }) {
+            if (user) {
+                token.role = (user as any).role
+                token.id = user.id
+            }
+            return token
+        },
+        async session({ session, token }) {
+            if (session.user) {
+                ; (session.user as any).role = token.role
+                    ; (session.user as any).id = token.id
+            }
+            return session
+        },
     },
 }
 
-/**
- * Helper function to get the session on the server side.
- */
 export const auth = () => getServerSession(authOptions)
