@@ -5,10 +5,159 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  OWNER
+  CUSTOMER
+  CLEANER
+}
+
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+}
+
+enum ReservationStatus {
+  RESERVED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+}
+
+enum ComplaintStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+}
+
+enum NotificationType {
+  RESERVATION
+  PAYMENT
+  COMPLAINT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         Role     @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  reservations  Reservation[]
+  payments      Payment[]
+  complaints    Complaint[]
+  attendances   Attendance[]  @relation("cleanerAttendances")
+  notifications Notification[]
+}
+
+model Room {
+  id           String     @id @default(cuid())
+  number       String     @unique
+  category     String
+  priceMonthly Int
+  facilities   String?
+  status       RoomStatus @default(AVAILABLE)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  reservations Reservation[]
+}
+
+model Reservation {
+  id         String            @id @default(cuid())
+  roomId     String
+  customerId String
+  status     ReservationStatus @default(RESERVED)
+  checkInAt  DateTime?
+  checkOutAt DateTime?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  room     Room      @relation(fields: [roomId], references: [id])
+  customer User      @relation(fields: [customerId], references: [id])
+  payments Payment[]
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  reservationId String
+  customerId    String
+  amount        Int
+  status        PaymentStatus @default(PENDING)
+  proofUrl      String?
+  paidAt        DateTime?
+  confirmedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  reservation Reservation @relation(fields: [reservationId], references: [id])
+  customer    User        @relation(fields: [customerId], references: [id])
+  transaction Transaction?
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  paymentId String   @unique
+  total     Int
+  method    String?
+  createdAt DateTime @default(now())
+
+  payment Payment @relation(fields: [paymentId], references: [id])
+}
+
+model Complaint {
+  id            String          @id @default(cuid())
+  customerId    String
+  reservationId String?
+  title         String
+  content       String
+  status        ComplaintStatus @default(OPEN)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  customer User @relation(fields: [customerId], references: [id])
+}
+
+model Attendance {
+  id        String           @id @default(cuid())
+  cleanerId String
+  status    AttendanceStatus
+  reason    String?
+  proofUrl  String?
+  timestamp DateTime         @default(now())
+
+  cleaner User @relation("cleanerAttendances", fields: [cleanerId], references: [id])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }
