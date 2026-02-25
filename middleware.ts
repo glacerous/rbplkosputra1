@@ -6,10 +6,11 @@ export async function middleware(request: NextRequest) {
     const token = await getToken({ req: request });
     const { pathname } = request.nextUrl;
 
-    // Allow auth-related paths and public files
+    // Allow auth-related paths, public files, and the forbidden page
     if (
         pathname.startsWith("/api/auth") ||
         pathname === "/login" ||
+        pathname === "/403" ||
         pathname === "/"
     ) {
         return NextResponse.next();
@@ -25,11 +26,19 @@ export async function middleware(request: NextRequest) {
         }
 
         const role = (token as any).role;
-        if (role !== "ADMIN" && role !== "OWNER") {
-            if (pathname.startsWith("/api/")) {
+
+        // ADMIN only -> /api/admin
+        if (pathname.startsWith("/api/admin")) {
+            if (role !== "ADMIN") {
                 return NextResponse.json({ error: "Forbidden" }, { status: 403 });
             }
-            return NextResponse.redirect(new URL("/", request.url));
+        }
+
+        // ADMIN + OWNER -> /admin
+        if (pathname.startsWith("/admin")) {
+            if (role !== "ADMIN" && role !== "OWNER") {
+                return NextResponse.redirect(new URL("/403", request.url));
+            }
         }
     }
 
