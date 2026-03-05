@@ -8,7 +8,7 @@ export async function requireRole(allowedRoles: Role[]) {
         throw new Error("Unauthorized: No session found")
     }
 
-    if (!allowedRoles.includes(session.user.role)) {
+    if (!allowedRoles.includes(session.user.role as Role)) {
         throw new Error(`Forbidden: Role ${session.user.role} is not allowed`)
     }
 

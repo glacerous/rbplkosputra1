@@ -1,3 +1,14 @@
+import { signOut } from "next-auth/react";
+import Link from "next/link";
+import {
+    CreditCard,
+    ChevronRight,
+    LogOut,
+    MessageSquare,
+    History,
+    DoorOpen
+} from "lucide-react";
+
 interface UserDashboardViewProps {
     reservation: any;
 }
@@ -10,9 +21,20 @@ export default function UserDashboardView({ reservation }: UserDashboardViewProp
         <div className="w-full min-h-screen bg-surface text-primary-dark font-sans py-12 px-4 sm:px-6">
             <div className="max-w-4xl mx-auto">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
-                    <div>
-                        <h1 className="text-[32px] font-bold mb-2">Hunian Saya</h1>
-                        <p className="text-base font-normal text-primary-dark/60">Kelola kamar dan detail masa tinggalmu.</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full justify-between">
+                        <div>
+                            <h1 className="text-[32px] font-bold mb-2">Hunian Saya</h1>
+                            <p className="text-base font-normal text-primary-dark/60">Kelola kamar dan detail masa tinggalmu.</p>
+                        </div>
+                        <button
+                            onClick={() => signOut()}
+                            className="px-6 py-2 rounded-xl bg-primary-dark/5 border border-primary-dark/10 text-sm font-bold hover:bg-white hover:text-red-600 transition-all flex items-center gap-2"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            Keluar
+                        </button>
                     </div>
                     <div className="bg-warm-surface border border-primary-dark/10 rounded-xl p-4 flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-accent-color/10 flex items-center justify-center">
@@ -63,47 +85,56 @@ export default function UserDashboardView({ reservation }: UserDashboardViewProp
 
                     {/* Active Lease & Payment */}
                     <div className="space-y-6">
-                        <div className="p-6 rounded-xl bg-warm-surface border border-primary-dark/10 shadow-sm">
-                            <h3 className="text-base font-bold mb-4 flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-accent-color" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1.447.894l-4.553-2.276-4.553 2.276A1 1 0 014 16V4z" clipRule="evenodd" />
-                                </svg>
-                                Masa Sewa
+                        <div className="p-6 rounded-[32px] bg-white border border-primary-dark/10 shadow-sm space-y-4">
+                            <h3 className="text-base font-black italic flex items-center gap-2">
+                                <CreditCard className="w-5 h-5 text-[#0881A3]" />
+                                Tagihan & Pembayaran
                             </h3>
-                            <div className="space-y-2">
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-primary-dark/50">Mulai sejak</span>
-                                    <span className="font-bold">{reservation.checkInAt ? new Date(reservation.checkInAt).toLocaleDateString('id-ID') : 'N/A'}</span>
-                                </div>
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-primary-dark/50">Biaya Bulanan</span>
-                                    <span className="font-bold text-accent-color">Rp {room?.priceMonthly?.toLocaleString('id-ID') || '0'}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="p-6 rounded-xl bg-warm-surface border border-primary-dark/10 shadow-sm">
-                            <h3 className="text-base font-bold mb-4 flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-accent-color" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                                    <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
-                                </svg>
-                                Status Pembayaran
-                            </h3>
-                            <div className="p-4 rounded-lg bg-surface border border-primary-dark/5 mb-4">
+                            <div className="p-4 rounded-2xl bg-[#F9F8ED] border border-[#F4E7D3]">
                                 <div className="flex items-center justify-between mb-1">
-                                    <div className="text-[10px] font-bold uppercase text-primary-dark/30 tracking-wider">Terakhir</div>
-                                    <div className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${latestPayment?.status === 'CONFIRMED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                                    <div className="text-[9px] font-black uppercase text-[#0881A3] tracking-widest">Status Terakhir</div>
+                                    <div className={`text-[9px] font-black px-2 py-0.5 rounded-full ${latestPayment?.status === 'CONFIRMED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
                                         {latestPayment?.status || 'No Records'}
                                     </div>
                                 </div>
-                                <div className="text-lg font-bold">
+                                <div className="text-xl font-black text-[#1F4E5F]">
                                     {latestPayment ? `Rp ${latestPayment.amount.toLocaleString('id-ID')}` : '-'}
                                 </div>
                             </div>
-                            <button className="w-full py-3 rounded-lg bg-accent-color text-white font-bold transition-all text-sm border-2 border-accent-color hover:bg-white hover:text-accent-color">
+                            <Link
+                                href="/payments"
+                                className="w-full block py-3 rounded-2xl bg-[#0881A3] text-white text-center font-black uppercase tracking-widest text-xs border border-transparent hover:bg-white hover:text-[#0881A3] hover:border-[#0881A3] transition-all"
+                            >
                                 Riwayat Pembayaran
-                            </button>
+                            </Link>
+                        </div>
+
+                        <div className="p-6 rounded-[32px] bg-[#1F4E5F] text-white shadow-xl space-y-6 relative overflow-hidden group">
+                            <div className="relative z-10 space-y-4">
+                                <h3 className="text-base font-black italic flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-accent-color" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                    </svg>
+                                    Kelola Hunian
+                                </h3>
+                                <div className="space-y-3">
+                                    <Link
+                                        href="/complaints"
+                                        className="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors"
+                                    >
+                                        <span className="text-sm font-bold">Lapor Komplain</span>
+                                        <ChevronRight className="w-4 h-4 text-white/30" />
+                                    </Link>
+                                    <button
+                                        onClick={() => confirm("Anda yakin ingin melakukan checkout?") && alert("Fitur checkout segera hadir (Sprint 4)")}
+                                        className="w-full flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 transition-colors text-left"
+                                    >
+                                        <span className="text-sm font-bold text-red-400">Checkout Kamar</span>
+                                        <LogOut className="w-4 h-4 text-red-400/30" />
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-[#0881A3] rounded-full blur-[60px] opacity-20" />
                         </div>
                     </div>
                 </div>

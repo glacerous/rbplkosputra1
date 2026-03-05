@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Loader2, Mail, Lock, AlertCircle } from "lucide-react"
 
@@ -16,8 +16,10 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>
 
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const redirectUrl = searchParams.get("redirect")
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
 
@@ -46,10 +48,11 @@ export default function LoginPage() {
                 return
             }
 
-            // We need to get the session to know where to redirect
-            // For now, we can use a fetch to /api/auth/session or just check a role if available
-            // But signIn result doesn't give session. Let's redirect to / and let middleware handle it if needed
-            // Or better, since we know it's client side, we can fetch session
+            if (redirectUrl) {
+                router.push(redirectUrl)
+                return
+            }
+
             const response = await fetch("/api/auth/session")
             const session = await response.json()
 
@@ -142,7 +145,41 @@ export default function LoginPage() {
                         </p>
                     </div>
                 </div>
+
+                {/* TEST ACCESS BUTTONS - TEMPORARY */}
+                <div className="pt-6 mt-6 border-t border-dashed border-primary-dark/10">
+                    <p className="text-[10px] font-bold uppercase text-primary-dark/30 tracking-widest text-center mb-4">Akses Uji Coba (Temporary)</p>
+                    <div className="grid grid-cols-2 gap-2">
+                        {[
+                            { role: "ADMIN", email: "admin@example.com", pass: "Admin123!", color: "bg-red-50 text-red-700 border-red-100" },
+                            { role: "OWNER", email: "owner@example.com", pass: "Owner123!", color: "bg-amber-50 text-amber-700 border-amber-100" },
+                            { role: "CLEANER", email: "cleaner@example.com", pass: "Cleaner123!", color: "bg-emerald-50 text-emerald-700 border-emerald-100" },
+                            { role: "TENANT", email: "customer@example.com", pass: "Customer123!", color: "bg-blue-50 text-blue-700 border-blue-100" },
+                        ].map((test) => (
+                            <button
+                                key={test.role}
+                                type="button"
+                                onClick={() => onSubmit({ email: test.email, password: test.pass })}
+                                className={`py-2 px-3 rounded-xl border text-[10px] font-black tracking-tight transition-all active:scale-95 hover:brightness-95 ${test.color}`}
+                            >
+                                {test.role}
+                            </button>
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
+    )
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-surface flex items-center justify-center font-sans text-primary-dark">
+                <div className="font-bold animate-pulse">Memuat...</div>
+            </div>
+        }>
+            <LoginForm />
+        </Suspense>
     )
 }

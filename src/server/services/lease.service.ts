@@ -8,7 +8,7 @@ export const leaseService = {
         return await prisma.reservation.findFirst({
             where: {
                 customerId: userId,
-                status: "CHECKED_IN",
+                status: { in: ["RESERVED", "CHECKED_IN"] },
             },
             include: {
                 room: true,
@@ -19,6 +19,9 @@ export const leaseService = {
                     take: 1,
                 },
             },
+            orderBy: {
+                createdAt: "desc"
+            }
         });
     },
 };

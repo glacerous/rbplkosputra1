@@ -1,8 +1,29 @@
 import "dotenv/config"
 import { NextAuthOptions, getServerSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { getPrisma } from "@/server/db/prisma"
+import { getUserByEmail } from "@/server/services/user.service"
 import bcrypt from "bcryptjs"
+import { DefaultSession } from "next-auth"
+
+declare module "next-auth" {
+    interface Session {
+        user: {
+            id: string
+            role: string
+        } & DefaultSession["user"]
+    }
+
+    interface User {
+        role: string
+    }
+}
+
+declare module "next-auth/jwt" {
+    interface JWT {
+        id: string
+        role: string
+    }
+}
 
 export const authOptions: NextAuthOptions = {
     session: {
@@ -24,12 +45,7 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 try {
-                    // Always pull the current prisma instance from the singleton
-                    const db = getPrisma();
-
-                    const user = await db.user.findUnique({
-                        where: { email: credentials.email },
-                    })
+                    const user = await getUserByEmail(credentials.email)
 
                     if (!user) {
                         return null

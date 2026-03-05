@@ -16,29 +16,34 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // Protect Admin/Owner routes
-    if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
+    // --- API PROTECTION ---
+
+    // Admin API -> ADMIN only
+    if (pathname.startsWith("/api/admin")) {
         if (!token) {
-            if (pathname.startsWith("/api/")) {
-                return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-            }
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+        if ((token as any).role !== "ADMIN") {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+    }
+
+    // Public API -> No role restriction (authentication handled in routes if needed)
+    if (pathname.startsWith("/api/public")) {
+        return NextResponse.next();
+    }
+
+    // --- UI PROTECTION ---
+
+    // Admin/Owner UI -> Requires interaction
+    if (pathname.startsWith("/admin")) {
+        if (!token) {
             return NextResponse.redirect(new URL("/login", request.url));
         }
 
         const role = (token as any).role;
-
-        // ADMIN only -> /api/admin
-        if (pathname.startsWith("/api/admin")) {
-            if (role !== "ADMIN") {
-                return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-            }
-        }
-
-        // ADMIN + OWNER -> /admin
-        if (pathname.startsWith("/admin")) {
-            if (role !== "ADMIN" && role !== "OWNER") {
-                return NextResponse.redirect(new URL("/403", request.url));
-            }
+        if (role !== "ADMIN" && role !== "OWNER") {
+            return NextResponse.redirect(new URL("/403", request.url));
         }
     }
 
