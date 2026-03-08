@@ -4,6 +4,7 @@ import {
   confirmPayment,
   rejectPayment,
   getUserPayments,
+  getTransactionReport,
 } from '../payment.service';
 import { prismaMock } from '@/test/setup';
 import { PaymentStatus } from '@prisma/client';
@@ -96,8 +97,10 @@ describe('Payment Service', () => {
         confirmedAt: new Date(),
       };
 
+      let capturedTxMock: any;
+
       prismaMock.$transaction.mockImplementation(async (fn: any) => {
-        const txMock = {
+        capturedTxMock = {
           payment: {
             update: vi.fn().mockResolvedValue(confirmedPayment),
           },
@@ -111,13 +114,61 @@ describe('Payment Service', () => {
             create: vi.fn().mockResolvedValue({}),
           },
         };
-        return fn(txMock);
+        return fn(capturedTxMock);
       });
 
       const result = await confirmPayment('payment-1');
 
       expect(prismaMock.$transaction).toHaveBeenCalled();
       expect(result.status).toBe(PaymentStatus.CONFIRMED);
+      expect(capturedTxMock.transaction.create).toHaveBeenCalledWith({
+        data: { paymentId: mockPayment.id, total: mockPayment.amount },
+      });
+    });
+  });
+
+  describe('getTransactionReport', () => {
+    const mockTransaction = {
+      id: 'transaction-1',
+      paymentId: 'payment-1',
+      total: 1000000,
+      createdAt: new Date('2026-03-08'),
+      updatedAt: new Date('2026-03-08'),
+      payment: {
+        customer: { name: 'John Doe', email: 'john@example.com' },
+        reservation: {
+          room: { number: '101' },
+        },
+      },
+    };
+
+    it('should return all transactions ordered by createdAt desc', async () => {
+      prismaMock.transaction.findMany.mockResolvedValue([mockTransaction]);
+
+      const result = await getTransactionReport();
+
+      expect(prismaMock.transaction.findMany).toHaveBeenCalledWith({
+        include: {
+          payment: {
+            include: {
+              customer: { select: { name: true, email: true } },
+              reservation: {
+                include: { room: { select: { number: true } } },
+              },
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+      expect(result).toEqual([mockTransaction]);
+    });
+
+    it('should return empty array when no transactions exist', async () => {
+      prismaMock.transaction.findMany.mockResolvedValue([]);
+
+      const result = await getTransactionReport();
+
+      expect(result).toEqual([]);
     });
   });
 

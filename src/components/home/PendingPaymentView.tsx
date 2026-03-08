@@ -143,6 +143,32 @@ export default function PendingPaymentView({
             </div>
           </div>
 
+          {/* Payment instructions */}
+          <div className="space-y-3">
+            <p className="text-primary-dark/40 text-[10px] font-black tracking-widest uppercase">
+              Cara Pembayaran
+            </p>
+            <ol className="space-y-2">
+              {[
+                `Transfer ke rekening ${process.env.NEXT_PUBLIC_PAYMENT_BANK_NAME ?? 'BCA'} ${process.env.NEXT_PUBLIC_PAYMENT_BANK_ACCOUNT ?? '1234567890'} a.n. ${process.env.NEXT_PUBLIC_PAYMENT_BANK_HOLDER ?? 'Kos Putra Friendly'}`,
+                'Nominal sesuai tagihan di atas',
+                'Upload bukti transfer pada kolom di bawah',
+              ].map((step, i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-3 text-sm text-[#1F4E5F]"
+                >
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#0881A3] text-[10px] font-black text-white">
+                    {i + 1}
+                  </span>
+                  <span className="leading-5 font-medium">{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className="bg-primary-dark/5 h-px" />
+
           {/* Proof upload area */}
           <div className="space-y-3">
             <p className="text-primary-dark/40 text-[10px] font-black tracking-widest uppercase">

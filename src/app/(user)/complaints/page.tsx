@@ -1,0 +1,202 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { MessageSquare, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+
+const createComplaintSchema = z.object({
+  title: z.string().min(3, 'Judul minimal 3 karakter').max(100),
+  content: z.string().min(10, 'Isi komplain minimal 10 karakter').max(1000),
+});
+
+type FormData = z.infer<typeof createComplaintSchema>;
+
+const STATUS_CONFIG = {
+  OPEN: { label: 'Terbuka', className: 'bg-amber-100 text-amber-700' },
+  IN_PROGRESS: { label: 'Diproses', className: 'bg-blue-100 text-blue-700' },
+  RESOLVED: { label: 'Selesai', className: 'bg-green-100 text-green-700' },
+};
+
+export default function ComplaintsPage() {
+  const [complaints, setComplaints] = useState<any[]>([]);
+  const [loadingList, setLoadingList] = useState(true);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({ resolver: zodResolver(createComplaintSchema) });
+
+  const fetchComplaints = () => {
+    setLoadingList(true);
+    fetch('/api/public/complaints')
+      .then((res) => res.json())
+      .then((data) => setComplaints(Array.isArray(data) ? data : []))
+      .catch(console.error)
+      .finally(() => setLoadingList(false));
+  };
+
+  useEffect(() => {
+    fetchComplaints();
+  }, []);
+
+  const onSubmit = async (data: FormData) => {
+    setSubmitError(null);
+    setSubmitSuccess(false);
+    try {
+      const res = await fetch('/api/public/complaints', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || 'Gagal mengirim komplain');
+      reset();
+      setSubmitSuccess(true);
+      fetchComplaints();
+    } catch (err: any) {
+      setSubmitError(err.message);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F4E7D3]/20 px-4 py-8 font-sans">
+      <div className="mx-auto max-w-2xl space-y-8">
+        {/* Header */}
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0881A3] text-white">
+            <MessageSquare className="h-6 w-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black italic text-[#1F4E5F]">Komplain</h1>
+            <p className="text-sm font-medium text-[#1F4E5F]/50">
+              Sampaikan keluhan atau masalah yang kamu alami.
+            </p>
+          </div>
+        </div>
+
+        {/* Submit Form */}
+        <div className="rounded-[40px] bg-white p-8 shadow-sm border border-[#F4E7D3] space-y-6">
+          <h2 className="text-lg font-black text-[#1F4E5F]">Buat Komplain Baru</h2>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black tracking-widest text-[#0881A3] uppercase">
+                Judul
+              </label>
+              <input
+                {...register('title')}
+                placeholder="Contoh: Kamar kurang bersih"
+                className="w-full rounded-2xl border border-[#F4E7D3] bg-[#F9F8ED] px-4 py-3 text-sm font-medium text-[#1F4E5F] outline-none placeholder:text-[#1F4E5F]/30 focus:border-[#0881A3] transition-colors"
+              />
+              {errors.title && (
+                <p className="text-xs text-red-500 font-medium">{errors.title.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black tracking-widest text-[#0881A3] uppercase">
+                Isi Komplain
+              </label>
+              <textarea
+                {...register('content')}
+                rows={4}
+                placeholder="Jelaskan masalah yang kamu alami secara detail..."
+                className="w-full rounded-2xl border border-[#F4E7D3] bg-[#F9F8ED] px-4 py-3 text-sm font-medium text-[#1F4E5F] outline-none placeholder:text-[#1F4E5F]/30 focus:border-[#0881A3] transition-colors resize-none"
+              />
+              {errors.content && (
+                <p className="text-xs text-red-500 font-medium">{errors.content.message}</p>
+              )}
+            </div>
+
+            {submitSuccess && (
+              <div className="flex items-center gap-2 rounded-2xl bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                Komplain berhasil dikirim!
+              </div>
+            )}
+
+            {submitError && (
+              <div className="flex items-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                {submitError}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#0881A3] py-3 text-sm font-black text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              {isSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <MessageSquare className="h-4 w-4" />
+              )}
+              {isSubmitting ? 'Mengirim...' : 'Kirim Komplain'}
+            </button>
+          </form>
+        </div>
+
+        {/* My Complaints List */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-black text-[#1F4E5F]">Riwayat Komplain</h2>
+
+          {loadingList ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-[#0881A3]" />
+            </div>
+          ) : complaints.length === 0 ? (
+            <div className="rounded-[40px] border-2 border-dashed border-[#F4E7D3] bg-white p-16 flex flex-col items-center justify-center text-center space-y-3">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F9F8ED] text-[#1F4E5F]/20">
+                <MessageSquare className="h-7 w-7" />
+              </div>
+              <div>
+                <h3 className="font-black text-[#1F4E5F]">Belum Ada Komplain</h3>
+                <p className="text-sm text-[#1F4E5F]/40 font-medium">
+                  Komplain yang kamu kirim akan muncul di sini.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {complaints.map((complaint) => {
+                const config = STATUS_CONFIG[complaint.status as keyof typeof STATUS_CONFIG];
+                return (
+                  <div
+                    key={complaint.id}
+                    className="rounded-3xl bg-white border border-[#F4E7D3] p-6 shadow-sm space-y-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="font-black text-[#1F4E5F]">{complaint.title}</h3>
+                      <span
+                        className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-black tracking-widest uppercase ${config.className}`}
+                      >
+                        {config.label}
+                      </span>
+                    </div>
+                    <p className="text-sm font-medium text-[#1F4E5F]/60 line-clamp-3">
+                      {complaint.content}
+                    </p>
+                    <p className="text-xs text-[#1F4E5F]/40 font-medium">
+                      {new Date(complaint.createdAt).toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
