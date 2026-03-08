@@ -4,14 +4,23 @@ import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
-import { CreditCard, ChevronRight, LogOut, Loader2 } from 'lucide-react';
+import {
+  CreditCard,
+  ChevronRight,
+  LogOut,
+  Loader2,
+  User,
+  History,
+} from 'lucide-react';
 
 interface UserDashboardViewProps {
   reservation: any;
+  name: string;
 }
 
 export default function UserDashboardView({
   reservation,
+  name,
 }: UserDashboardViewProps) {
   const latestPayment = reservation.payments?.[0];
   const room = reservation.room;
@@ -42,12 +51,12 @@ export default function UserDashboardView({
   };
 
   return (
-    <div className="bg-surface text-primary-dark min-h-screen w-full px-4 py-12 font-sans sm:px-6">
+    <div className="bg-surface text-primary-dark min-h-screen w-full px-4 py-8 font-sans sm:px-6 sm:py-12">
       <div className="mx-auto max-w-4xl">
-        <div className="mb-10 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
-          <div className="flex w-full flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="mb-2 text-[32px] font-bold">Hunian Saya</h1>
+              <h1 className="mb-2 text-[32px] font-bold">Halo, {name}</h1>
               <p className="text-primary-dark/60 text-base font-normal">
                 Kelola kamar dan detail masa tinggalmu.
               </p>
@@ -185,6 +194,26 @@ export default function UserDashboardView({
                   Kelola Hunian
                 </h3>
                 <div className="space-y-3">
+                  <Link
+                    href="/profile"
+                    className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-3 transition-colors hover:bg-white/10"
+                  >
+                    <span className="flex items-center gap-2 text-sm font-bold">
+                      <User className="h-4 w-4 text-white/50" />
+                      Profil Saya
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-white/30" />
+                  </Link>
+                  <Link
+                    href="/history"
+                    className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-3 transition-colors hover:bg-white/10"
+                  >
+                    <span className="flex items-center gap-2 text-sm font-bold">
+                      <History className="h-4 w-4 text-white/50" />
+                      Riwayat Sewa
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-white/30" />
+                  </Link>
                   <Link
                     href="/complaints"
                     className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-3 transition-colors hover:bg-white/10"

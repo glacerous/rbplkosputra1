@@ -81,6 +81,45 @@ export async function checkoutReservation(
   });
 }
 
+export async function cancelReservation(
+  reservationId: string,
+  customerId: string,
+) {
+  const reservation = await prisma.reservation.findUnique({
+    where: { id: reservationId },
+    include: { room: true },
+  });
+
+  if (!reservation) throw new Error('Reservasi tidak ditemukan');
+  if (reservation.customerId !== customerId) throw new Error('Akses ditolak');
+  if (reservation.status !== 'RESERVED')
+    throw new Error(
+      'Hanya reservasi yang belum dikonfirmasi yang bisa dibatalkan',
+    );
+
+  return await prisma.$transaction(async (tx) => {
+    await tx.reservation.update({
+      where: { id: reservationId },
+      data: { status: 'CANCELLED' },
+    });
+    await tx.room.update({
+      where: { id: reservation.roomId },
+      data: { status: 'AVAILABLE' },
+    });
+  });
+}
+
+export async function getUserReservationHistory(userId: string) {
+  return await prisma.reservation.findMany({
+    where: { customerId: userId },
+    include: {
+      room: true,
+      payments: { orderBy: { createdAt: 'desc' } },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+}
+
 export async function getUserReservation(userId: string) {
   return await prisma.reservation.findFirst({
     where: { customerId: userId },
