@@ -12,6 +12,7 @@ import {
   User,
   History,
 } from 'lucide-react';
+import NotificationBell from '@/components/NotificationBell';
 
 interface UserDashboardViewProps {
   reservation: any;
@@ -61,26 +62,29 @@ export default function UserDashboardView({
                 Kelola kamar dan detail masa tinggalmu.
               </p>
             </div>
-            <button
-              onClick={() => signOut()}
-              className="bg-primary-dark/5 border-primary-dark/10 flex items-center gap-2 rounded-xl border px-6 py-2 text-sm font-bold transition-all hover:bg-white hover:text-red-600"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+            <div className="flex items-center gap-3">
+              <NotificationBell />
+              <button
+                onClick={() => signOut()}
+                className="bg-primary-dark/5 border-primary-dark/10 flex items-center gap-2 rounded-xl border px-6 py-2 text-sm font-bold transition-all hover:bg-white hover:text-red-600"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-              </svg>
-              Keluar
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+                Keluar
+              </button>
+            </div>
           </div>
           <div className="bg-warm-surface border-primary-dark/10 flex items-center gap-3 rounded-xl border p-4">
             <div className="bg-accent-color/10 flex h-10 w-10 items-center justify-center rounded-full">
