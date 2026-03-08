@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import RoomsListSkeleton from '@/components/skeletons/RoomsListSkeleton';
 
@@ -14,6 +15,7 @@ interface Room {
 }
 
 export default function RoomsPage() {
+  const { data: session } = useSession();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -107,7 +109,9 @@ export default function RoomsPage() {
                   <Link
                     href={
                       room.status === 'AVAILABLE'
-                        ? `/login?redirect=/rooms/${room.id}`
+                        ? session
+                          ? `/rooms/${room.id}`
+                          : `/login?redirect=/rooms/${room.id}`
                         : '#'
                     }
                     onClick={(e) =>

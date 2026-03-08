@@ -106,6 +106,10 @@ export async function cancelReservation(
       where: { id: reservation.roomId },
       data: { status: 'AVAILABLE' },
     });
+    await tx.payment.updateMany({
+      where: { reservationId, status: 'PENDING' },
+      data: { status: 'REJECTED' },
+    });
   });
 }
 
