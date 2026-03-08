@@ -10,8 +10,8 @@ export async function confirmPayment(paymentId: string) {
                 confirmedAt: new Date(),
             },
             include: {
-                reservation: true
-            }
+                reservation: true,
+            },
         });
 
         // 2. Update Reservation status
@@ -20,15 +20,21 @@ export async function confirmPayment(paymentId: string) {
             data: {
                 status: "CHECKED_IN",
                 checkInAt: new Date(),
-            }
+            },
         });
 
         // 3. Update Room status
         await tx.room.update({
             where: { id: payment.reservation.roomId },
+            data: { status: "OCCUPIED" },
+        });
+
+        // 4. Create Transaction record
+        await tx.transaction.create({
             data: {
-                status: "OCCUPIED",
-            }
+                paymentId: payment.id,
+                total: payment.amount,
+            },
         });
 
         return payment;
@@ -38,9 +44,28 @@ export async function confirmPayment(paymentId: string) {
 export async function rejectPayment(paymentId: string) {
     return await prisma.payment.update({
         where: { id: paymentId },
+        data: { status: "REJECTED" },
+    });
+}
+
+export async function uploadPaymentProof(paymentId: string, customerId: string, proofUrl: string) {
+    const payment = await prisma.payment.findUnique({
+        where: { id: paymentId },
+    });
+
+    if (!payment) throw new Error("Pembayaran tidak ditemukan");
+    if (payment.customerId !== customerId) throw new Error("Akses ditolak");
+    if (payment.status !== "PENDING" && payment.status !== "REJECTED") {
+        throw new Error("Bukti hanya bisa diunggah untuk pembayaran yang pending atau ditolak");
+    }
+
+    return await prisma.payment.update({
+        where: { id: paymentId },
         data: {
-            status: "REJECTED",
-        }
+            proofUrl,
+            status: "PENDING",
+            paidAt: new Date(),
+        },
     });
 }
 
@@ -50,11 +75,21 @@ export async function getPendingPayments() {
         include: {
             customer: true,
             reservation: {
-                include: {
-                    room: true
-                }
-            }
+                include: { room: true },
+            },
         },
-        orderBy: { createdAt: "desc" }
+        orderBy: { createdAt: "desc" },
+    });
+}
+
+export async function getUserPayments(customerId: string) {
+    return await prisma.payment.findMany({
+        where: { customerId },
+        include: {
+            reservation: {
+                include: { room: true },
+            },
+        },
+        orderBy: { createdAt: "desc" },
     });
 }
