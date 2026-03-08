@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   createComplaint,
   getUserComplaints,
@@ -6,6 +6,16 @@ import {
   updateComplaintStatus,
 } from '../complaint.service';
 import { prismaMock } from '@/test/setup';
+
+vi.mock('@/server/email/resend', () => ({
+  sendComplaintStatusEmail: vi.fn().mockResolvedValue(undefined),
+}));
+vi.mock('@/server/services/notification.service', () => ({
+  createNotification: vi.fn().mockResolvedValue(undefined),
+}));
+
+import { sendComplaintStatusEmail } from '@/server/email/resend';
+import { createNotification } from '@/server/services/notification.service';
 
 describe('Complaint Service', () => {
   const mockComplaint = {
@@ -97,9 +107,12 @@ describe('Complaint Service', () => {
   });
 
   describe('updateComplaintStatus', () => {
+    const mockUser = { email: 'customer@example.com', name: 'Customer' };
+
     it('should call complaint.update with correct id and status', async () => {
       const updated = { ...mockComplaint, status: 'IN_PROGRESS' as const };
       prismaMock.complaint.update.mockResolvedValue(updated);
+      prismaMock.user.findUnique.mockResolvedValue(mockUser);
 
       const result = await updateComplaintStatus('complaint-1', 'IN_PROGRESS');
 
@@ -113,10 +126,59 @@ describe('Complaint Service', () => {
     it('should update status to RESOLVED', async () => {
       const resolved = { ...mockComplaint, status: 'RESOLVED' as const };
       prismaMock.complaint.update.mockResolvedValue(resolved);
+      prismaMock.user.findUnique.mockResolvedValue(mockUser);
 
       const result = await updateComplaintStatus('complaint-1', 'RESOLVED');
 
       expect(result.status).toBe('RESOLVED');
+    });
+
+    it('should fire-and-forget notification and email for IN_PROGRESS', async () => {
+      const updated = { ...mockComplaint, status: 'IN_PROGRESS' as const };
+      prismaMock.complaint.update.mockResolvedValue(updated);
+      prismaMock.user.findUnique.mockResolvedValue(mockUser);
+
+      await updateComplaintStatus('complaint-1', 'IN_PROGRESS');
+
+      await new Promise((r) => setTimeout(r, 0));
+
+      expect(sendComplaintStatusEmail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: mockUser.email,
+          newStatus: 'IN_PROGRESS',
+        }),
+      );
+      expect(createNotification).toHaveBeenCalledWith(
+        mockComplaint.customerId,
+        'COMPLAINT',
+        expect.any(String),
+        expect.any(String),
+      );
+    });
+
+    it('should fire-and-forget notification and email for RESOLVED', async () => {
+      const resolved = { ...mockComplaint, status: 'RESOLVED' as const };
+      prismaMock.complaint.update.mockResolvedValue(resolved);
+      prismaMock.user.findUnique.mockResolvedValue(mockUser);
+
+      await updateComplaintStatus('complaint-1', 'RESOLVED');
+
+      await new Promise((r) => setTimeout(r, 0));
+
+      expect(sendComplaintStatusEmail).toHaveBeenCalledWith(
+        expect.objectContaining({ to: mockUser.email, newStatus: 'RESOLVED' }),
+      );
+    });
+
+    it('should NOT fire notification for OPEN status', async () => {
+      vi.clearAllMocks();
+      prismaMock.complaint.update.mockResolvedValue(mockComplaint);
+
+      await updateComplaintStatus('complaint-1', 'OPEN');
+
+      await new Promise((r) => setTimeout(r, 0));
+
+      expect(createNotification).not.toHaveBeenCalled();
     });
   });
 });

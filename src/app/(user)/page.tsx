@@ -6,6 +6,7 @@ import PublicLandingView from '@/components/home/PublicLandingView';
 import LoggedInNoRoomView from '@/components/home/LoggedInNoRoomView';
 import PendingPaymentView from '@/components/home/PendingPaymentView';
 import UserDashboardView from '@/components/home/UserDashboardView';
+import CleanerDashboardView from '@/components/home/CleanerDashboardView';
 import HomePageSkeleton from '@/components/home/skeletons/HomePageSkeleton';
 
 export default function Home() {
@@ -15,6 +16,10 @@ export default function Home() {
 
   useEffect(() => {
     if (status === 'authenticated') {
+      if ((session?.user as any)?.role === 'CLEANER') {
+        setLoading(false);
+        return;
+      }
       fetch('/api/public/leases/active')
         .then((res) => res.json())
         .then((data) => {
@@ -36,6 +41,10 @@ export default function Home() {
   }
 
   const name = session.user.name ?? '';
+
+  if (!loading && (session?.user as any)?.role === 'CLEANER') {
+    return <CleanerDashboardView name={name} />;
+  }
 
   if (!activeReservation) {
     return <LoggedInNoRoomView name={name} />;

@@ -49,10 +49,18 @@ export default async function RoomDetailPage({
         </Link>
 
         <div className="bg-warm-surface border-primary-dark/10 overflow-hidden rounded-[40px] border shadow-xl">
-          <div className="bg-primary-dark/5 relative flex aspect-video items-center justify-center">
-            <span className="text-primary-dark/5 text-9xl font-black italic select-none">
-              {room.number}
-            </span>
+          <div className="bg-primary-dark/5 relative flex aspect-video items-center justify-center overflow-hidden">
+            {room.imageUrl ? (
+              <img
+                src={room.imageUrl}
+                alt={`Kamar ${room.number}`}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              <span className="text-primary-dark/5 text-9xl font-black italic select-none">
+                {room.number}
+              </span>
+            )}
             <div className="from-warm-surface absolute inset-0 bg-gradient-to-t to-transparent opacity-40" />
             <div className="absolute bottom-8 left-8">
               <h1 className="text-primary-dark text-3xl font-black tracking-tighter italic sm:text-4xl">

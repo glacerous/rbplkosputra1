@@ -1,5 +1,6 @@
 import { prisma } from '@/server/db/prisma';
 import bcrypt from 'bcryptjs';
+import { Role } from '@prisma/client';
 
 export async function listUsers() {
   return await prisma.user.findMany({
@@ -50,4 +51,18 @@ export async function updateUser(
     where: { id },
     data: updateData,
   });
+}
+
+export async function adminUpdateUser(
+  id: string,
+  data: { name?: string; role?: Role },
+) {
+  return await prisma.user.update({
+    where: { id },
+    data,
+  });
+}
+
+export async function deleteUser(id: string) {
+  await prisma.user.delete({ where: { id } });
 }

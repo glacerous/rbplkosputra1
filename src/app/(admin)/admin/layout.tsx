@@ -4,14 +4,11 @@ import Link from 'next/link';
 import {
   LayoutDashboard,
   Home,
-  Users,
   CreditCard,
   MessageSquare,
-  ClipboardList,
   Bell,
-  Settings,
-  LogOut,
   Receipt,
+  Users,
 } from 'lucide-react';
 import { LogoutButton } from '@/components/auth/logout-button';
 
@@ -33,7 +30,6 @@ export default async function AdminLayout({
     { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { label: 'Kelola Kamar', href: '/admin/rooms', icon: Home },
     { label: 'Penyewa', href: '/admin/users', icon: Users },
-    { label: 'Reservasi', href: '/admin/reservations', icon: ClipboardList },
     { label: 'Pembayaran', href: '/admin/payments', icon: CreditCard },
     { label: 'Komplain', href: '/admin/complaints', icon: MessageSquare },
     { label: 'Kehadiran', href: '/admin/attendance', icon: Bell },

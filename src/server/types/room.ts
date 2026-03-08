@@ -1,22 +1,24 @@
-import { RoomStatus } from "@prisma/client";
+import { RoomStatus } from '@prisma/client';
 
 export interface Room {
-    id: string;
-    number: string;
-    category: string;
-    priceMonthly: number;
-    facilities?: string | null;
-    status: RoomStatus;
-    createdAt: Date;
-    updatedAt: Date;
+  id: string;
+  number: string;
+  category: string;
+  priceMonthly: number;
+  facilities?: string | null;
+  imageUrl?: string | null;
+  status: RoomStatus;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateRoomInput {
-    number: string;
-    category: string;
-    priceMonthly: number;
-    facilities?: string;
-    status?: RoomStatus;
+  number: string;
+  category: string;
+  priceMonthly: number;
+  facilities?: string;
+  imageUrl?: string | null;
+  status?: RoomStatus;
 }
 
-export interface UpdateRoomInput extends Partial<CreateRoomInput> { }
+export interface UpdateRoomInput extends Partial<CreateRoomInput> {}

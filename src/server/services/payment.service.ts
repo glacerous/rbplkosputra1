@@ -1,7 +1,12 @@
 import { prisma } from '@/server/db/prisma';
+import { createNotification } from '@/server/services/notification.service';
+import {
+  sendPaymentConfirmedEmail,
+  sendPaymentRejectedEmail,
+} from '@/server/email/resend';
 
 export async function confirmPayment(paymentId: string) {
-  return await prisma.$transaction(async (tx) => {
+  const payment = await prisma.$transaction(async (tx) => {
     // 1. Update Payment status
     const payment = await tx.payment.update({
       where: { id: paymentId },
@@ -10,7 +15,7 @@ export async function confirmPayment(paymentId: string) {
         confirmedAt: new Date(),
       },
       include: {
-        reservation: true,
+        reservation: { include: { room: true } },
       },
     });
 
@@ -39,13 +44,59 @@ export async function confirmPayment(paymentId: string) {
 
     return payment;
   });
+
+  prisma.user
+    .findUnique({
+      where: { id: payment.customerId },
+      select: { email: true, name: true },
+    })
+    .then((user) => {
+      if (!user) return;
+      const roomNumber = payment.reservation.room.number;
+      createNotification(
+        payment.customerId,
+        'PAYMENT',
+        'Pembayaran Dikonfirmasi',
+        `Pembayaran Anda untuk Kamar ${roomNumber} telah dikonfirmasi.`,
+      ).catch(console.error);
+      sendPaymentConfirmedEmail({
+        to: user.email,
+        customerName: user.name,
+        roomNumber,
+      }).catch(console.error);
+    })
+    .catch(console.error);
+
+  return payment;
 }
 
 export async function rejectPayment(paymentId: string) {
-  return await prisma.payment.update({
+  const payment = await prisma.payment.update({
     where: { id: paymentId },
     data: { status: 'REJECTED' },
   });
+
+  prisma.user
+    .findUnique({
+      where: { id: payment.customerId },
+      select: { email: true, name: true },
+    })
+    .then((user) => {
+      if (!user) return;
+      createNotification(
+        payment.customerId,
+        'PAYMENT',
+        'Pembayaran Ditolak',
+        'Pembayaran Anda telah ditolak. Silakan unggah ulang bukti pembayaran.',
+      ).catch(console.error);
+      sendPaymentRejectedEmail({
+        to: user.email,
+        customerName: user.name,
+      }).catch(console.error);
+    })
+    .catch(console.error);
+
+  return payment;
 }
 
 export async function uploadPaymentProof(

@@ -11,6 +11,7 @@ interface Room {
   category: string;
   priceMonthly: number;
   facilities: string | null;
+  imageUrl?: string | null;
   status: string;
 }
 
@@ -53,9 +54,17 @@ export default function RoomsPage() {
               className="group bg-warm-surface border-primary-dark/10 relative overflow-hidden rounded-2xl border shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="bg-primary-dark/5 relative flex aspect-[16/10] items-center justify-center overflow-hidden">
-                <span className="text-primary-dark/10 text-6xl font-black italic select-none">
-                  {room.number}
-                </span>
+                {room.imageUrl ? (
+                  <img
+                    src={room.imageUrl}
+                    alt={`Kamar ${room.number}`}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="text-primary-dark/10 text-6xl font-black italic select-none">
+                    {room.number}
+                  </span>
+                )}
                 <div className="from-warm-surface absolute inset-0 bg-gradient-to-t to-transparent opacity-60" />
                 <div className="absolute top-4 right-4">
                   <span

@@ -9,6 +9,20 @@ import {
 import { prismaMock } from '@/test/setup';
 import { PaymentStatus } from '@prisma/client';
 
+vi.mock('@/server/email/resend', () => ({
+  sendPaymentConfirmedEmail: vi.fn().mockResolvedValue(undefined),
+  sendPaymentRejectedEmail: vi.fn().mockResolvedValue(undefined),
+}));
+vi.mock('@/server/services/notification.service', () => ({
+  createNotification: vi.fn().mockResolvedValue(undefined),
+}));
+
+import {
+  sendPaymentConfirmedEmail,
+  sendPaymentRejectedEmail,
+} from '@/server/email/resend';
+import { createNotification } from '@/server/services/notification.service';
+
 describe('Payment Service', () => {
   const mockPayment = {
     id: 'payment-1',
@@ -30,8 +44,11 @@ describe('Payment Service', () => {
       checkOutAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
+      room: { id: 'room-1', number: '101' },
     },
   };
+
+  const mockUser = { email: 'customer@example.com', name: 'Customer' };
 
   describe('uploadPaymentProof', () => {
     it('should update proofUrl on happy path', async () => {
@@ -117,6 +134,8 @@ describe('Payment Service', () => {
         return fn(capturedTxMock);
       });
 
+      prismaMock.user.findUnique.mockResolvedValue(mockUser);
+
       const result = await confirmPayment('payment-1');
 
       expect(prismaMock.$transaction).toHaveBeenCalled();
@@ -124,6 +143,40 @@ describe('Payment Service', () => {
       expect(capturedTxMock.transaction.create).toHaveBeenCalledWith({
         data: { paymentId: mockPayment.id, total: mockPayment.amount },
       });
+    });
+
+    it('should fire-and-forget notification and email after confirm', async () => {
+      const confirmedPayment = {
+        ...mockPayment,
+        status: PaymentStatus.CONFIRMED,
+        confirmedAt: new Date(),
+      };
+
+      prismaMock.$transaction.mockImplementation(async (fn: any) => {
+        const txMock = {
+          payment: { update: vi.fn().mockResolvedValue(confirmedPayment) },
+          reservation: { update: vi.fn().mockResolvedValue({}) },
+          room: { update: vi.fn().mockResolvedValue({}) },
+          transaction: { create: vi.fn().mockResolvedValue({}) },
+        };
+        return fn(txMock);
+      });
+      prismaMock.user.findUnique.mockResolvedValue(mockUser);
+
+      await confirmPayment('payment-1');
+
+      // Allow microtasks to settle
+      await new Promise((r) => setTimeout(r, 0));
+
+      expect(sendPaymentConfirmedEmail).toHaveBeenCalledWith(
+        expect.objectContaining({ to: mockUser.email }),
+      );
+      expect(createNotification).toHaveBeenCalledWith(
+        mockPayment.customerId,
+        'PAYMENT',
+        expect.any(String),
+        expect.any(String),
+      );
     });
   });
 
@@ -178,6 +231,7 @@ describe('Payment Service', () => {
         ...mockPayment,
         status: PaymentStatus.REJECTED,
       });
+      prismaMock.user.findUnique.mockResolvedValue(mockUser);
 
       const result = await rejectPayment('payment-1');
 
@@ -186,6 +240,28 @@ describe('Payment Service', () => {
         data: { status: 'REJECTED' },
       });
       expect(result.status).toBe(PaymentStatus.REJECTED);
+    });
+
+    it('should fire-and-forget notification and email after reject', async () => {
+      prismaMock.payment.update.mockResolvedValue({
+        ...mockPayment,
+        status: PaymentStatus.REJECTED,
+      });
+      prismaMock.user.findUnique.mockResolvedValue(mockUser);
+
+      await rejectPayment('payment-1');
+
+      await new Promise((r) => setTimeout(r, 0));
+
+      expect(sendPaymentRejectedEmail).toHaveBeenCalledWith(
+        expect.objectContaining({ to: mockUser.email }),
+      );
+      expect(createNotification).toHaveBeenCalledWith(
+        mockPayment.customerId,
+        'PAYMENT',
+        expect.any(String),
+        expect.any(String),
+      );
     });
   });
 
