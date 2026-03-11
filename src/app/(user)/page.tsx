@@ -7,12 +7,12 @@ import LoggedInNoRoomView from '@/components/home/LoggedInNoRoomView';
 import PendingPaymentView from '@/components/home/PendingPaymentView';
 import UserDashboardView from '@/components/home/UserDashboardView';
 import CleanerDashboardView from '@/components/home/CleanerDashboardView';
-import HomePageSkeleton from '@/components/home/skeletons/HomePageSkeleton';
+import { Loader2 } from 'lucide-react';
 
 export default function Home() {
   const { data: session, status } = useSession();
   const [activeReservation, setActiveReservation] = useState<any>(null);
-  const [loading, setLoading] = useState(status !== 'authenticated');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -30,10 +30,14 @@ export default function Home() {
     } else if (status === 'unauthenticated') {
       setLoading(false);
     }
-  }, [status]);
+  }, [status, session]);
 
   if (status === 'loading' || loading) {
-    return <HomePageSkeleton />;
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#F9F8ED]">
+        <Loader2 className="h-12 w-12 animate-spin text-[#0881A3]" />
+      </div>
+    );
   }
 
   if (!session) {

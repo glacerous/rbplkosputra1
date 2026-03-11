@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { getRooms } from "@/server/services/room.service";
+import { RoomStatus } from "@prisma/client";
 
-export async function GET() {
+
+export async function GET(request: Request) {
     try {
-        const rooms = await getRooms();
+        const { searchParams } = new URL(request.url);
+        const status = searchParams.get("status") as RoomStatus | null;
+
+        const rooms = await getRooms(status || undefined);
         return NextResponse.json(rooms);
     } catch (error) {
         console.error("[API_PUBLIC_ROOMS_GET]", error);

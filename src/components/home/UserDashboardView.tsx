@@ -2,7 +2,7 @@
 
 import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   CreditCard,
@@ -10,9 +10,65 @@ import {
   LogOut,
   Loader2,
   User,
-  History,
 } from 'lucide-react';
 import NotificationBell from '@/components/NotificationBell';
+import MonthlyPaymentView from './MonthlyPaymentView';
+
+function CountdownTimer({ targetDate }: { targetDate: Date }) {
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const calculate = () => {
+      const now = new Date().getTime();
+      const distance = targetDate.getTime() - now;
+
+      if (distance < 0) {
+        setTimeLeft(null);
+        return;
+      }
+
+      setTimeLeft({
+        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+        hours: Math.floor(
+          (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+        ),
+        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((distance % (1000 * 60)) / 1000),
+      });
+    };
+
+    calculate();
+    const timer = setInterval(calculate, 1000);
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  if (!timeLeft) return <span className="text-red-500 font-bold">Jatuh Tempo!</span>;
+
+  return (
+    <div className="flex gap-2 text-[10px] font-black tracking-widest text-[#0881A3]">
+      <div className="flex flex-col items-center">
+        <span>{timeLeft.days}D</span>
+      </div>
+      <span>:</span>
+      <div className="flex flex-col items-center">
+        <span>{timeLeft.hours}H</span>
+      </div>
+      <span>:</span>
+      <div className="flex flex-col items-center">
+        <span>{timeLeft.minutes}M</span>
+      </div>
+      <span>:</span>
+      <div className="flex flex-col items-center">
+        <span>{timeLeft.seconds}S</span>
+      </div>
+    </div>
+  );
+}
 
 interface UserDashboardViewProps {
   reservation: any;
@@ -27,6 +83,56 @@ export default function UserDashboardView({
   const room = reservation.room;
   const router = useRouter();
   const [checkingOut, setCheckingOut] = useState(false);
+  const [creatingPayment, setCreatingPayment] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<any>(null);
+
+  // Calculate next due date (monthly from check-in)
+  const checkInDate = new Date(reservation.checkInAt || reservation.createdAt);
+  const now = new Date();
+  let nextDueDate = new Date(checkInDate);
+  while (nextDueDate <= now) {
+    nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+  }
+
+  const handlePayBill = async () => {
+    if (latestPayment?.status === 'PENDING') {
+      setSelectedPayment(latestPayment);
+      return;
+    }
+    if (latestPayment?.status === 'CONFIRMED' && !selectedPayment) {
+      // Optional: maybe they want to see the confirmed one? 
+      // But user said "bayar tagihan", so usually for pending/new ones.
+      // However, let's allow viewing the latest if it's confirmed too?
+      // Actually, let's stick to creating/showing pending.
+    }
+
+    setCreatingPayment(true);
+    try {
+      const res = await fetch('/api/public/payments/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reservationId: reservation.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Gagal membuat tagihan');
+      setSelectedPayment(data);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setCreatingPayment(false);
+    }
+  };
+
+  if (selectedPayment) {
+    return (
+      <MonthlyPaymentView
+        reservation={reservation}
+        payment={selectedPayment}
+        name={name}
+        onBack={() => setSelectedPayment(null)}
+      />
+    );
+  }
 
   const handleCheckout = async () => {
     if (
@@ -118,8 +224,18 @@ export default function UserDashboardView({
               Informasi Kamar
             </h3>
             <div className="flex flex-col gap-6 sm:flex-row">
-              <div className="bg-primary-dark/5 border-primary-dark/5 text-primary-dark/20 flex aspect-video w-full items-center justify-center rounded-lg border text-sm italic sm:w-1/2">
-                Foto Kamar
+              <div className="bg-primary-dark/5 border-primary-dark/5 relative aspect-video w-full overflow-hidden rounded-lg border sm:w-1/2">
+                {room?.imageUrl ? (
+                  <img
+                    src={room.imageUrl}
+                    alt={`Kamar ${room.number}`}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="text-primary-dark/20 flex h-full items-center justify-center text-sm italic">
+                    Foto Kamar
+                  </div>
+                )}
               </div>
               <div className="flex flex-1 flex-col justify-between">
                 <div className="space-y-4">
@@ -140,14 +256,6 @@ export default function UserDashboardView({
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-3 pt-6">
-                  <button className="bg-surface border-primary-dark/10 flex-1 rounded-lg border py-2.5 text-sm font-bold transition-all hover:bg-white">
-                    Detail Kamar
-                  </button>
-                  <button className="bg-surface border-primary-dark/10 flex-1 rounded-lg border py-2.5 text-sm font-bold transition-all hover:bg-white">
-                    Lapor Kendala
-                  </button>
-                </div>
               </div>
             </div>
           </div>
@@ -160,6 +268,21 @@ export default function UserDashboardView({
                 Tagihan & Pembayaran
               </h3>
               <div className="rounded-2xl border border-[#F4E7D3] bg-[#F9F8ED] p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="text-[9px] font-black tracking-widest text-[#0881A3] uppercase">
+                    Jatuh Tempo
+                  </div>
+                  <div className="text-[9px] font-bold text-[#1F4E5F]">
+                    {nextDueDate.toLocaleDateString('id-ID', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </div>
+                </div>
+                <div className="mb-3">
+                  <CountdownTimer targetDate={nextDueDate} />
+                </div>
                 <div className="mb-1 flex items-center justify-between">
                   <div className="text-[9px] font-black tracking-widest text-[#0881A3] uppercase">
                     Status Terakhir
@@ -176,9 +299,21 @@ export default function UserDashboardView({
                     : '-'}
                 </div>
               </div>
+              <button
+                onClick={handlePayBill}
+                disabled={creatingPayment}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-transparent bg-[#0881A3] py-3 text-center text-xs font-black tracking-widest text-white uppercase transition-all hover:border-[#0881A3] hover:bg-white hover:text-[#0881A3] disabled:opacity-50"
+              >
+                {creatingPayment ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <CreditCard className="h-4 w-4" />
+                )}
+                Bayar Tagihan
+              </button>
               <Link
                 href="/payments"
-                className="block w-full rounded-2xl border border-transparent bg-[#0881A3] py-3 text-center text-xs font-black tracking-widest text-white uppercase transition-all hover:border-[#0881A3] hover:bg-white hover:text-[#0881A3]"
+                className="text-primary-dark/40 block w-full text-center text-[10px] font-bold uppercase transition-all hover:text-[#0881A3]"
               >
                 Riwayat Pembayaran
               </Link>
@@ -205,16 +340,6 @@ export default function UserDashboardView({
                     <span className="flex items-center gap-2 text-sm font-bold">
                       <User className="h-4 w-4 text-white/50" />
                       Profil Saya
-                    </span>
-                    <ChevronRight className="h-4 w-4 text-white/30" />
-                  </Link>
-                  <Link
-                    href="/history"
-                    className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-3 transition-colors hover:bg-white/10"
-                  >
-                    <span className="flex items-center gap-2 text-sm font-bold">
-                      <History className="h-4 w-4 text-white/50" />
-                      Riwayat Sewa
                     </span>
                     <ChevronRight className="h-4 w-4 text-white/30" />
                   </Link>

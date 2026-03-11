@@ -15,6 +15,7 @@ import {
 export default function AdminPaymentsPage() {
     const [payments, setPayments] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<"check-in" | "monthly">("check-in");
     const [processingId, setProcessingId] = useState<string | null>(null);
     const [proofModal, setProofModal] = useState<string | null>(null);
 
@@ -33,6 +34,10 @@ export default function AdminPaymentsPage() {
     useEffect(() => {
         fetchPayments();
     }, []);
+
+    const checkInPayments = payments.filter((p) => p.reservation.status === "RESERVED");
+    const monthlyPayments = payments.filter((p) => p.reservation.status === "CHECKED_IN");
+    const displayedPayments = activeTab === "check-in" ? checkInPayments : monthlyPayments;
 
     const handleConfirm = async (id: string) => {
         if (!confirm("Konfirmasi pembayaran ini? Kamar akan otomatis terisi.")) return;
@@ -79,24 +84,48 @@ export default function AdminPaymentsPage() {
                     </div>
                     <div>
                         <h1 className="text-2xl font-black italic">Verifikasi Pembayaran</h1>
-                        <p className="text-[#1F4E5F]/50 font-medium">Setujui bukti transfer untuk aktifkan akses tenant.</p>
+                        <p className="text-[#1F4E5F]/50 font-medium">Pisahkan verifikasi check-in pertama dan bulanan.</p>
                     </div>
                 </div>
             </header>
 
-            {payments.length === 0 ? (
+            {/* Tabs */}
+            <div className="flex bg-white p-2 rounded-2xl border border-[#F4E7D3] w-fit">
+                <button
+                    onClick={() => setActiveTab("check-in")}
+                    className={`px-6 py-2.5 rounded-xl text-sm font-black italic tracking-tight transition-all flex items-center gap-2 ${activeTab === "check-in" ? "bg-[#0881A3] text-white shadow-lg shadow-[#0881A3]/20" : "text-[#1F4E5F]/40 hover:text-[#1F4E5F]"}`}
+                >
+                    Check-in Pertama
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeTab === "check-in" ? "bg-white/20 text-white" : "bg-[#F9F8ED] text-[#1F4E5F]/40"}`}>
+                        {checkInPayments.length}
+                    </span>
+                </button>
+                <button
+                    onClick={() => setActiveTab("monthly")}
+                    className={`px-6 py-2.5 rounded-xl text-sm font-black italic tracking-tight transition-all flex items-center gap-2 ${activeTab === "monthly" ? "bg-[#0881A3] text-white shadow-lg shadow-[#0881A3]/20" : "text-[#1F4E5F]/40 hover:text-[#1F4E5F]"}`}
+                >
+                    Pembayaran Bulanan
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeTab === "monthly" ? "bg-white/20 text-white" : "bg-[#F9F8ED] text-[#1F4E5F]/40"}`}>
+                        {monthlyPayments.length}
+                    </span>
+                </button>
+            </div>
+
+            {displayedPayments.length === 0 ? (
                 <div className="bg-white p-20 rounded-[40px] border-2 border-dashed border-[#F4E7D3] flex flex-col items-center justify-center text-center space-y-4">
                     <div className="w-16 h-16 bg-[#F9F8ED] rounded-full flex items-center justify-center text-[#1F4E5F]/20">
                         <CheckCircle2 className="w-8 h-8" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-black text-[#1F4E5F]">Semua Beres!</h3>
-                        <p className="text-sm text-[#1F4E5F]/40 font-medium">Tidak ada pembayaran yang menunggu verifikasi saat ini.</p>
+                        <h3 className="text-lg font-black text-[#1F4E5F]">
+                            {activeTab === "check-in" ? "Belum ada Check-in baru" : "Belum ada Pembayaran Bulanan baru"}
+                        </h3>
+                        <p className="text-sm text-[#1F4E5F]/40 font-medium">Verifikasi ini akan muncul saat tenant melakukan pembayaran.</p>
                     </div>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-6">
-                    {payments.map((payment) => (
+                    {displayedPayments.map((payment) => (
                         <div key={payment.id} className="bg-white p-8 rounded-[40px] border border-[#F4E7D3] shadow-sm hover:shadow-xl transition-all">
                             <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-8">
                                 <div className="flex items-start gap-6 flex-1">

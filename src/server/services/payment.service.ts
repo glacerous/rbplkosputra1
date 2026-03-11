@@ -166,3 +166,35 @@ export async function getUserPayments(customerId: string) {
     orderBy: { createdAt: 'desc' },
   });
 }
+
+export async function createMonthlyPayment(reservationId: string, customerId: string) {
+  const reservation = await prisma.reservation.findUnique({
+    where: { id: reservationId },
+    include: { room: true },
+  });
+
+  if (!reservation) throw new Error('Reservasi tidak ditemukan');
+  if (reservation.customerId !== customerId) throw new Error('Akses ditolak');
+  if (reservation.status !== 'CHECKED_IN') throw new Error('Kamar harus dalam status aktif');
+
+  // Check if there is already a pending payment for this reservation
+  const pendingPayment = await prisma.payment.findFirst({
+    where: {
+      reservationId,
+      status: 'PENDING',
+    },
+  });
+
+  if (pendingPayment) {
+    return pendingPayment;
+  }
+
+  return await prisma.payment.create({
+    data: {
+      reservationId,
+      customerId,
+      amount: reservation.room.priceMonthly,
+      status: 'PENDING',
+    },
+  });
+}

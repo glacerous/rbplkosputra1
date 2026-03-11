@@ -181,40 +181,6 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Human Touch: Quick Information Row */}
-      <div className="grid grid-cols-1 gap-6 pt-4 sm:grid-cols-2">
-        <div className="group relative flex min-h-[220px] flex-col justify-between overflow-hidden rounded-[40px] bg-[#1F4E5F] p-8 text-white shadow-xl">
-          <div className="relative z-10 space-y-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/10">
-              <Layout className="h-5 w-5 text-white/50" />
-            </div>
-            <h4 className="text-2xl leading-tight font-black italic">
-              Pantau Hunian <br />
-              Secara Langsung
-            </h4>
-            <p className="max-w-[200px] text-xs font-medium text-white/50">
-              Semua data sekarang terhubung dengan database pusat secara
-              real-time.
-            </p>
-          </div>
-          <div className="absolute -top-10 -right-10 h-48 w-48 rounded-full bg-[#0881A3] opacity-30 blur-[80px] transition-opacity group-hover:opacity-50"></div>
-        </div>
-
-        <div className="group flex flex-col items-center justify-center space-y-4 rounded-[40px] border-2 border-dashed border-[#F4E7D3] bg-white p-8 text-center transition-colors hover:border-[#0881A3]/30">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F9F8ED] text-[#0881A3] transition-transform group-hover:scale-110">
-            <Users className="h-6 w-6" />
-          </div>
-          <div>
-            <h4 className="text-lg font-black text-[#1F4E5F]">
-              Punya Pertanyaan Teknis?
-            </h4>
-            <p className="mt-1 text-xs font-medium text-[#1F4E5F]/40">
-              Gunakan sistem ticketing atau hubungi support <br />
-              untuk bantuan pengelolaan panel.
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

@@ -2,8 +2,9 @@ import { prisma } from "@/server/db/prisma";
 import { RoomStatus } from "@prisma/client";
 import { CreateRoomInput, UpdateRoomInput } from "@/server/types/room";
 
-export async function getRooms() {
+export async function getRooms(status?: RoomStatus) {
     return await prisma.room.findMany({
+        where: status ? { status } : undefined,
         orderBy: {
             createdAt: "desc",
         },
