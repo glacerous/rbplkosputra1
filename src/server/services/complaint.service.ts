@@ -54,27 +54,27 @@ export async function updateComplaintStatus(
   });
 
   if (status === 'IN_PROGRESS' || status === 'RESOLVED') {
-    prisma.user
-      .findUnique({
-        where: { id: complaint.customerId },
-        select: { email: true, name: true },
-      })
-      .then((user) => {
-        if (!user) return;
+    const user = await prisma.user.findUnique({
+      where: { id: complaint.customerId },
+      select: { email: true, name: true },
+    });
+
+    if (user) {
+      await Promise.all([
         createNotification(
           complaint.customerId,
           'COMPLAINT',
           'Update Status Komplain',
           `Komplain "${complaint.title}" kini ${status === 'IN_PROGRESS' ? 'sedang diproses' : 'telah diselesaikan'}.`,
-        ).catch(console.error);
+        ),
         sendComplaintStatusEmail({
           to: user.email,
           customerName: user.name,
           complaintTitle: complaint.title,
           newStatus: status,
-        }).catch(console.error);
-      })
-      .catch(console.error);
+        }),
+      ]).catch(console.error);
+    }
   }
 
   return complaint;

@@ -45,27 +45,27 @@ export async function confirmPayment(paymentId: string) {
     return payment;
   });
 
-  prisma.user
-    .findUnique({
-      where: { id: payment.customerId },
-      select: { email: true, name: true },
-    })
-    .then((user) => {
-      if (!user) return;
-      const roomNumber = payment.reservation.room.number;
+  const user = await prisma.user.findUnique({
+    where: { id: payment.customerId },
+    select: { email: true, name: true },
+  });
+
+  if (user) {
+    const roomNumber = payment.reservation.room.number;
+    await Promise.all([
       createNotification(
         payment.customerId,
         'PAYMENT',
         'Pembayaran Dikonfirmasi',
         `Pembayaran Anda untuk Kamar ${roomNumber} telah dikonfirmasi.`,
-      ).catch(console.error);
+      ),
       sendPaymentConfirmedEmail({
         to: user.email,
         customerName: user.name,
         roomNumber,
-      }).catch(console.error);
-    })
-    .catch(console.error);
+      }),
+    ]).catch(console.error);
+  }
 
   return payment;
 }
@@ -76,25 +76,25 @@ export async function rejectPayment(paymentId: string) {
     data: { status: 'REJECTED' },
   });
 
-  prisma.user
-    .findUnique({
-      where: { id: payment.customerId },
-      select: { email: true, name: true },
-    })
-    .then((user) => {
-      if (!user) return;
+  const user = await prisma.user.findUnique({
+    where: { id: payment.customerId },
+    select: { email: true, name: true },
+  });
+
+  if (user) {
+    await Promise.all([
       createNotification(
         payment.customerId,
         'PAYMENT',
         'Pembayaran Ditolak',
         'Pembayaran Anda telah ditolak. Silakan unggah ulang bukti pembayaran.',
-      ).catch(console.error);
+      ),
       sendPaymentRejectedEmail({
         to: user.email,
         customerName: user.name,
-      }).catch(console.error);
-    })
-    .catch(console.error);
+      }),
+    ]).catch(console.error);
+  }
 
   return payment;
 }
@@ -116,7 +116,7 @@ export async function uploadPaymentProof(
     );
   }
 
-  return await prisma.payment.update({
+  const updatedPayment = await prisma.payment.update({
     where: { id: paymentId },
     data: {
       proofUrl,
@@ -124,6 +124,25 @@ export async function uploadPaymentProof(
       paidAt: new Date(),
     },
   });
+
+  // Notify admins
+  const admins = await prisma.user.findMany({
+    where: { role: 'ADMIN' },
+    select: { id: true },
+  });
+
+  await Promise.all(
+    admins.map((admin) =>
+      createNotification(
+        admin.id,
+        'PAYMENT',
+        'Bukti Pembayaran Baru',
+        'User mengunggah bukti pembayaran',
+      ),
+    ),
+  ).catch(console.error);
+
+  return updatedPayment;
 }
 
 export async function getPendingPayments() {

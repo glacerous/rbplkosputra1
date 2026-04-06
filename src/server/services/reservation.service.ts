@@ -1,4 +1,6 @@
 import { prisma } from '@/server/db/prisma';
+import { createNotification } from './notification.service';
+import { sendReservationEmail } from '@/server/email/resend';
 
 export async function createReservation(roomId: string, customerId: string) {
   // 1. Check if room exists and is available
@@ -29,7 +31,7 @@ export async function createReservation(roomId: string, customerId: string) {
   }
 
   // 3. Create Reservation and initial Payment in a transaction
-  return await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     const reservation = await tx.reservation.create({
       data: {
         roomId,
@@ -49,6 +51,29 @@ export async function createReservation(roomId: string, customerId: string) {
 
     return { reservation, payment };
   });
+
+  // Notify customer & Send Email
+  const customer = await prisma.user.findUnique({
+    where: { id: customerId },
+    select: { email: true, name: true },
+  });
+
+  if (customer) {
+    await Promise.all([
+      createNotification(
+        customerId,
+        'RESERVATION',
+        'Reservasi Berhasil',
+        'Reservasi berhasil',
+      ),
+      sendReservationEmail({
+        to: customer.email,
+        customerName: customer.name,
+      }),
+    ]).catch(console.error);
+  }
+
+  return result;
 }
 
 export async function checkoutReservation(
@@ -65,7 +90,7 @@ export async function checkoutReservation(
   if (reservation.status !== 'CHECKED_IN')
     throw new Error('Hanya reservasi aktif yang bisa di-checkout');
 
-  return await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx) => {
     await tx.reservation.update({
       where: { id: reservationId },
       data: {
@@ -79,6 +104,14 @@ export async function checkoutReservation(
       data: { status: 'AVAILABLE' },
     });
   });
+
+  // Notify customer
+  await createNotification(
+    customerId,
+    'RESERVATION',
+    'Checkout Berhasil',
+    'Checkout berhasil',
+  ).catch(console.error);
 }
 
 export async function cancelReservation(
@@ -97,7 +130,7 @@ export async function cancelReservation(
       'Hanya reservasi yang belum dikonfirmasi yang bisa dibatalkan',
     );
 
-  return await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx) => {
     await tx.reservation.update({
       where: { id: reservationId },
       data: { status: 'CANCELLED' },
@@ -111,6 +144,14 @@ export async function cancelReservation(
       data: { status: 'REJECTED' },
     });
   });
+
+  // Notify customer
+  await createNotification(
+    customerId,
+    'RESERVATION',
+    'Reservasi Dibatalkan',
+    'Reservasi dibatalkan',
+  ).catch(console.error);
 }
 
 export async function getUserReservationHistory(userId: string) {
