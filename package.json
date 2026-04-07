@@ -31,6 +31,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "latest",
+    "recharts": "^3.8.1",
     "resend": "latest",
     "tailwind-merge": "^3.5.0",
     "ws": "^8.19.0",

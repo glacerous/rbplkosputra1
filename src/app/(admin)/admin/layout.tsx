@@ -7,7 +7,6 @@ import {
   CreditCard,
   MessageSquare,
   Bell,
-  Receipt,
   Users,
 } from 'lucide-react';
 import { LogoutButton } from '@/components/auth/logout-button';
@@ -33,7 +32,6 @@ export default async function AdminLayout({
     { label: 'Pembayaran', href: '/admin/payments', icon: CreditCard },
     { label: 'Komplain', href: '/admin/complaints', icon: MessageSquare },
     { label: 'Kehadiran', href: '/admin/attendance', icon: Bell },
-    { label: 'Laporan Transaksi', href: '/admin/transactions', icon: Receipt },
   ];
 
   return (

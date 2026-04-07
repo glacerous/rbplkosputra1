@@ -28,6 +28,16 @@ export async function middleware(request: NextRequest) {
         }
     }
 
+    // Owner API -> OWNER only
+    if (pathname.startsWith("/api/owner")) {
+        if (!token) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+        if ((token as any).role !== "OWNER") {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+    }
+
     // Public API -> No role restriction (authentication handled in routes if needed)
     if (pathname.startsWith("/api/public")) {
         return NextResponse.next();
@@ -35,14 +45,22 @@ export async function middleware(request: NextRequest) {
 
     // --- UI PROTECTION ---
 
-    // Admin/Owner UI -> Requires interaction
+    // Admin UI -> ADMIN only
     if (pathname.startsWith("/admin")) {
         if (!token) {
             return NextResponse.redirect(new URL("/login", request.url));
         }
+        if ((token as any).role !== "ADMIN") {
+            return NextResponse.redirect(new URL("/403", request.url));
+        }
+    }
 
-        const role = (token as any).role;
-        if (role !== "ADMIN" && role !== "OWNER") {
+    // Owner UI -> OWNER only
+    if (pathname.startsWith("/owner")) {
+        if (!token) {
+            return NextResponse.redirect(new URL("/login", request.url));
+        }
+        if ((token as any).role !== "OWNER") {
             return NextResponse.redirect(new URL("/403", request.url));
         }
     }
