@@ -103,6 +103,7 @@ model Reservation {
 model Payment {
   id            String        @id @default(cuid())
   reservationId String
+  // TODO: remove customerId in next migration, it is redundant with reservation.customerId
   customerId    String
   amount        Int
   status        PaymentStatus @default(PENDING)

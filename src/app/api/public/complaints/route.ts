@@ -1,52 +1,39 @@
-import { auth } from '@/server/auth/auth';
+import { requireUser } from '@/server/auth/requireUser';
+import { validateRequest } from '@/server/validators/validate';
+import { ApiError } from '@/server/errors/api-error';
 import {
   createComplaint,
   createComplaintSchema,
   getUserComplaints,
 } from '@/server/services/complaint.service';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-
+    const session = await requireUser();
     const complaints = await getUserComplaints(session.user.id);
     return NextResponse.json(complaints, { status: 200 });
   } catch (error: any) {
+    if (error instanceof ApiError) {
+      return NextResponse.json({ message: error.message }, { status: error.statusCode });
+    }
     console.error('Fetch User Complaints Error:', error);
-    return NextResponse.json(
-      { message: error.message || 'Internal Server Error' },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
+    const session = await requireUser();
+    const parsedData = await validateRequest(req, createComplaintSchema);
+    const complaint = await createComplaint(session.user.id, parsedData);
 
-    const body = await req.json();
-    const parsed = createComplaintSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json(
-        { message: parsed.error.issues[0]?.message ?? 'Validasi gagal' },
-        { status: 400 },
-      );
-    }
-
-    const complaint = await createComplaint(session.user.id, parsed.data);
     return NextResponse.json(complaint, { status: 201 });
   } catch (error: any) {
+    if (error instanceof ApiError) {
+      return NextResponse.json({ message: error.message }, { status: error.statusCode });
+    }
     console.error('Create Complaint Error:', error);
-    return NextResponse.json(
-      { message: error.message || 'Internal Server Error' },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }

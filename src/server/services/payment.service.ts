@@ -1,5 +1,6 @@
 import { prisma } from '@/server/db/prisma';
 import { createNotification } from '@/server/services/notification.service';
+import { NOTIFICATION_TEMPLATES } from '@/server/notifications/templates';
 import {
   sendPaymentConfirmedEmail,
   sendPaymentRejectedEmail,
@@ -46,18 +47,20 @@ export async function confirmPayment(paymentId: string) {
   });
 
   const user = await prisma.user.findUnique({
-    where: { id: payment.customerId },
+    where: { id: payment.reservation.customerId },
     select: { email: true, name: true },
   });
 
   if (user) {
     const roomNumber = payment.reservation.room.number;
+    const notification = NOTIFICATION_TEMPLATES.PAYMENT_CONFIRMED(roomNumber);
+
     await Promise.all([
       createNotification(
-        payment.customerId,
+        payment.reservation.customerId,
         'PAYMENT',
-        'Pembayaran Dikonfirmasi',
-        `Pembayaran Anda untuk Kamar ${roomNumber} telah dikonfirmasi.`,
+        notification.title,
+        notification.message,
       ),
       sendPaymentConfirmedEmail({
         to: user.email,
@@ -74,20 +77,25 @@ export async function rejectPayment(paymentId: string) {
   const payment = await prisma.payment.update({
     where: { id: paymentId },
     data: { status: 'REJECTED' },
+    include: {
+      reservation: true
+    }
   });
 
   const user = await prisma.user.findUnique({
-    where: { id: payment.customerId },
+    where: { id: payment.reservation.customerId },
     select: { email: true, name: true },
   });
 
   if (user) {
+    const notification = NOTIFICATION_TEMPLATES.PAYMENT_REJECTED();
+
     await Promise.all([
       createNotification(
-        payment.customerId,
+        payment.reservation.customerId,
         'PAYMENT',
-        'Pembayaran Ditolak',
-        'Pembayaran Anda telah ditolak. Silakan unggah ulang bukti pembayaran.',
+        notification.title,
+        notification.message,
       ),
       sendPaymentRejectedEmail({
         to: user.email,
@@ -106,10 +114,11 @@ export async function uploadPaymentProof(
 ) {
   const payment = await prisma.payment.findUnique({
     where: { id: paymentId },
+    include: { reservation: true },
   });
 
   if (!payment) throw new Error('Pembayaran tidak ditemukan');
-  if (payment.customerId !== customerId) throw new Error('Akses ditolak');
+  if (payment.reservation.customerId !== customerId) throw new Error('Akses ditolak');
   if (payment.status !== 'PENDING' && payment.status !== 'REJECTED') {
     throw new Error(
       'Bukti hanya bisa diunggah untuk pembayaran yang pending atau ditolak',
@@ -131,13 +140,15 @@ export async function uploadPaymentProof(
     select: { id: true },
   });
 
+  const notification = NOTIFICATION_TEMPLATES.NEW_PAYMENT_PROOF();
+
   await Promise.all(
     admins.map((admin) =>
       createNotification(
         admin.id,
         'PAYMENT',
-        'Bukti Pembayaran Baru',
-        'User mengunggah bukti pembayaran',
+        notification.title,
+        notification.message,
       ),
     ),
   ).catch(console.error);
