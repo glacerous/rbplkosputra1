@@ -21,4 +21,4 @@ export interface CreateRoomInput {
   status?: RoomStatus;
 }
 
-export interface UpdateRoomInput extends Partial<CreateRoomInput> {}
+export type UpdateRoomInput = Partial<CreateRoomInput>;

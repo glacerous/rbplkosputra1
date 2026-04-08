@@ -114,9 +114,10 @@ describe('Payment Service', () => {
         confirmedAt: new Date(),
       };
 
-      let capturedTxMock: any;
+      let capturedTxMock: Record<string, unknown> | null = null;
 
-      prismaMock.$transaction.mockImplementation(async (fn: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      prismaMock.$transaction.mockImplementation(async (fn: (tx: any) => Promise<unknown>) => {
         capturedTxMock = {
           payment: {
             update: vi.fn().mockResolvedValue(confirmedPayment),
@@ -140,6 +141,7 @@ describe('Payment Service', () => {
 
       expect(prismaMock.$transaction).toHaveBeenCalled();
       expect(result.status).toBe(PaymentStatus.CONFIRMED);
+      // @ts-expect-error - property access on mock
       expect(capturedTxMock.transaction.create).toHaveBeenCalledWith({
         data: { paymentId: mockPayment.id, total: mockPayment.amount },
       });
@@ -152,7 +154,8 @@ describe('Payment Service', () => {
         confirmedAt: new Date(),
       };
 
-      prismaMock.$transaction.mockImplementation(async (fn: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      prismaMock.$transaction.mockImplementation(async (fn: (tx: any) => Promise<unknown>) => {
         const txMock = {
           payment: { update: vi.fn().mockResolvedValue(confirmedPayment) },
           reservation: { update: vi.fn().mockResolvedValue({}) },

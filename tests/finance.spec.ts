@@ -20,7 +20,8 @@ vi.mock('@/server/db/prisma', () => ({
 describe('GET /api/owner/finance', () => {
     test('returns 403 if user is not OWNER', async () => {
         // Setup mock non-owner user
-        (auth as any).mockResolvedValueOnce({
+        // @ts-expect-error - mocked member
+        auth.mockResolvedValueOnce({
             user: { id: 'user1', role: 'ADMIN' },
         });
 
@@ -33,12 +34,14 @@ describe('GET /api/owner/finance', () => {
 
     test('returns 200 and expected data shape if user is OWNER', async () => {
         // Setup mock owner
-        (auth as any).mockResolvedValueOnce({
+        // @ts-expect-error - mocked member
+        auth.mockResolvedValueOnce({
             user: { id: 'owner1', role: 'OWNER' },
         });
 
         // Setup mock pristine data from DB
-        (prisma.payment.findMany as any).mockResolvedValueOnce([
+        // @ts-expect-error - mocked member
+        prisma.payment.findMany.mockResolvedValueOnce([
             {
                 id: '1',
                 amount: 500000,

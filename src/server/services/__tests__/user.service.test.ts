@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { listUsers, getUserByEmail, registerUser, updateUser } from "../user.service";
 import { prismaMock } from "@/test/setup";
 import bcrypt from "bcryptjs";
@@ -30,7 +30,8 @@ describe("User Service", () => {
                 role: mockUser.role,
                 createdAt: mockUser.createdAt,
             };
-            prismaMock.user.findMany.mockResolvedValue([userSummary] as any);
+            // @ts-expect-error - mocked member
+            prismaMock.user.findMany.mockResolvedValue([userSummary]);
 
             const result = await listUsers();
 

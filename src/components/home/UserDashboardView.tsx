@@ -1,9 +1,9 @@
 'use client';
 
 import { signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   CreditCard,
   ChevronRight,
@@ -72,8 +72,8 @@ function CountdownTimer({ targetDate }: { targetDate: Date }) {
 
 interface Reservation {
   id: string;
-  checkInAt?: string | null;
-  createdAt: string;
+  checkInAt?: Date | string | null;
+  createdAt: Date | string;
   room?: {
     number: string;
     category?: string;
@@ -98,7 +98,6 @@ export default function UserDashboardView({
 }: UserDashboardViewProps) {
   const latestPayment = reservation.payments?.[0];
   const room = reservation.room;
-  const router = useRouter();
   const [checkingOut, setCheckingOut] = useState(false);
   const [creatingPayment, setCreatingPayment] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<NonNullable<Reservation['payments']>[number] | null>(null);
@@ -106,7 +105,7 @@ export default function UserDashboardView({
   // Calculate next due date (monthly from check-in)
   const checkInDate = new Date(reservation.checkInAt || reservation.createdAt);
   const now = new Date();
-  let nextDueDate = new Date(checkInDate);
+  const nextDueDate = new Date(checkInDate);
   while (nextDueDate <= now) {
     nextDueDate.setMonth(nextDueDate.getMonth() + 1);
   }
@@ -243,10 +242,11 @@ export default function UserDashboardView({
             <div className="flex flex-col gap-6 sm:flex-row">
               <div className="bg-primary-dark/5 border-primary-dark/5 relative aspect-video w-full overflow-hidden rounded-lg border sm:w-1/2">
                 {room?.imageUrl ? (
-                  <img
+                  <Image
                     src={room.imageUrl}
                     alt={`Kamar ${room.number}`}
-                    className="h-full w-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 ) : (
                   <div className="text-primary-dark/20 flex h-full items-center justify-center text-sm italic">

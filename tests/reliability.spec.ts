@@ -46,7 +46,8 @@ describe('Reliability & Observability Tests', () => {
 
     describe('expireReservations job', () => {
         it('should skip if no expired reservations found', async () => {
-            (prisma.reservation.findMany as any).mockResolvedValue([]);
+            // @ts-expect-error - mocked member
+            prisma.reservation.findMany.mockResolvedValue([]);
 
             await expireReservations();
 
@@ -58,7 +59,8 @@ describe('Reliability & Observability Tests', () => {
                 { id: 'res-1', roomId: 'room-1' },
                 { id: 'res-2', roomId: 'room-2' },
             ];
-            (prisma.reservation.findMany as any).mockResolvedValue(mockExpired);
+            // @ts-expect-error - mocked member
+            prisma.reservation.findMany.mockResolvedValue(mockExpired);
 
             await expireReservations();
 
@@ -70,7 +72,8 @@ describe('Reliability & Observability Tests', () => {
 
     describe('sendPaymentReminders job', () => {
         it('should skip if no pending reservations found', async () => {
-            (prisma.reservation.findMany as any).mockResolvedValue([]);
+            // @ts-expect-error - mocked member
+            prisma.reservation.findMany.mockResolvedValue([]);
 
             await sendPaymentReminders();
 
@@ -81,7 +84,8 @@ describe('Reliability & Observability Tests', () => {
             const mockPending = [
                 { id: 'res-1', customerId: 'user-1', customer: { email: 'test@example.com', name: 'Test' } },
             ];
-            (prisma.reservation.findMany as any).mockResolvedValue(mockPending);
+            // @ts-expect-error - mocked member
+            prisma.reservation.findMany.mockResolvedValue(mockPending);
 
             await sendPaymentReminders();
 

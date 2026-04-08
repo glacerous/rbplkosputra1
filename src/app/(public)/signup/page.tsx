@@ -68,7 +68,7 @@ export default function SignupPage() {
                 });
             }, 2000);
 
-        } catch (e) {
+        } catch {
             setError("Koneksi gagal. Silakan coba lagi.");
             setIsLoading(false)
         }

@@ -15,10 +15,20 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+
+interface Room {
+  id: string;
+  number: string;
+  category: string;
+  priceMonthly: number;
+  imageUrl?: string | null;
+  facilities?: string | null;
+}
 
 export default function PublicLandingView() {
   const [activeTab, setActiveTab] = useState<'nearby' | 'transport'>('nearby');
-  const [rooms, setRooms] = useState<any[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
   const [loadingRooms, setLoadingRooms] = useState(true);
 
   useEffect(() => {
@@ -46,11 +56,11 @@ export default function PublicLandingView() {
         {/* Header Hero */}
         <header className="bg-white rounded-b-[40px] shadow-sm border-b border-[#F4E7D3] overflow-hidden">
           <div className="h-64 w-full relative">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="/images/kos-hero.png"
               alt="Kos Putra Friendly"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
             <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white to-transparent" />
           </div>
@@ -98,8 +108,7 @@ export default function PublicLandingView() {
                   <div key={room.id} className="bg-white overflow-hidden rounded-[32px] border border-[#F4E7D3] shadow-sm flex flex-col group">
                     <div className="h-48 bg-[#F9F8ED] relative flex items-center justify-center text-[#1F4E5F]/10">
                       {room.imageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={room.imageUrl} alt={`Kamar ${room.number}`} className="w-full h-full object-cover" />
+                        <Image src={room.imageUrl} alt={`Kamar ${room.number}`} fill className="object-cover" />
                       ) : (
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />

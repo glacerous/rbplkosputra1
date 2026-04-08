@@ -16,7 +16,8 @@ describe('Rooms API Root', () => {
   describe('GET', () => {
     it('should return a list of rooms', async () => {
       const mockRooms = [{ id: '1', number: '101' }];
-      vi.mocked(roomService.getRooms).mockResolvedValue(mockRooms as any);
+      // @ts-expect-error - mocked member
+      vi.mocked(roomService.getRooms).mockResolvedValue(mockRooms);
 
       const response = await GET();
       const data = await response.json();
@@ -44,11 +45,12 @@ describe('Rooms API Root', () => {
         priceMonthly: 5000000,
         facilities: 'All',
       };
+      // @ts-expect-error - mocked member
       vi.mocked(roomService.createRoom).mockResolvedValue({
         id: '5',
         ...input,
         status: RoomStatus.AVAILABLE,
-      } as any);
+      });
 
       const fd = new FormData();
       fd.append('number', input.number);

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 interface Room {
   id: string;
@@ -95,9 +96,9 @@ export default function LoggedInNoRoomView({ name }: { name: string }) {
                 key={room.id}
                 className="bg-warm-surface border-primary-dark/10 hover:bg-warm-surface/80 flex items-center gap-4 rounded-xl border p-4 shadow-sm transition-colors"
               >
-                <div className="bg-primary-dark/5 border-primary-dark/5 flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg border">
+                <div className="bg-primary-dark/5 border-primary-dark/5 relative h-16 w-16 overflow-hidden rounded-lg border">
                   {room.imageUrl ? (
-                    <img src={room.imageUrl} alt={room.number} className="h-full w-full object-cover" />
+                    <Image src={room.imageUrl} alt={room.number} fill className="object-cover" />
                   ) : (
                     <span className="caption text-primary-dark/20 text-center leading-none font-bold">
                       {room.number}

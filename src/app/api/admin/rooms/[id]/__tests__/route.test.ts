@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET, PUT, DELETE } from '../route';
 import * as roomService from '@/server/services/room.service';
-import { RoomStatus } from '@prisma/client';
 
 vi.mock('@/server/services/room.service', () => ({
   getRoomById: vi.fn(),
@@ -19,7 +18,8 @@ describe('Room ID API', () => {
   describe('GET', () => {
     it('should return room if found', async () => {
       const mockRoom = { id: 'room-1', number: '101' };
-      vi.mocked(roomService.getRoomById).mockResolvedValue(mockRoom as any);
+      // @ts-expect-error - mocked member
+      vi.mocked(roomService.getRoomById).mockResolvedValue(mockRoom);
 
       const response = await GET(new Request('http://localhost'), { params });
       const data = await response.json();
@@ -44,10 +44,11 @@ describe('Room ID API', () => {
   describe('PUT', () => {
     it('should update room with valid data', async () => {
       const input = { category: 'Updated' };
+      // @ts-expect-error - mocked member
       vi.mocked(roomService.updateRoom).mockResolvedValue({
         id: 'room-1',
         ...input,
-      } as any);
+      });
 
       const fd = new FormData();
       fd.append('category', input.category);
@@ -67,9 +68,10 @@ describe('Room ID API', () => {
 
   describe('DELETE', () => {
     it('should delete room and return 204', async () => {
+      // @ts-expect-error - mocked member
       vi.mocked(roomService.deleteRoom).mockResolvedValue({
         id: 'room-1',
-      } as any);
+      });
 
       const response = await DELETE(new Request('http://localhost'), {
         params,

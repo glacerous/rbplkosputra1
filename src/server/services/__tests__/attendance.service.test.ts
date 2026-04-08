@@ -51,7 +51,7 @@ describe('Attendance Service', () => {
 
     it('should throw on invalid status (Zod validation)', async () => {
       await expect(
-        submitAttendance('cleaner-1', { status: 'INVALID' as any }),
+        submitAttendance('cleaner-1', { status: 'INVALID' as never }),
       ).rejects.toThrow();
     });
   });
