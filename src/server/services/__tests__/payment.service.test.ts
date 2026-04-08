@@ -53,6 +53,7 @@ describe('Payment Service', () => {
   describe('uploadPaymentProof', () => {
     it('should update proofUrl on happy path', async () => {
       prismaMock.payment.findUnique.mockResolvedValue(mockPayment);
+      prismaMock.user.findMany.mockResolvedValue([]); // Add this line
       prismaMock.payment.update.mockResolvedValue({
         ...mockPayment,
         proofUrl: 'https://example.com/proof.jpg',
@@ -241,6 +242,7 @@ describe('Payment Service', () => {
       expect(prismaMock.payment.update).toHaveBeenCalledWith({
         where: { id: 'payment-1' },
         data: { status: 'REJECTED' },
+        include: { reservation: true },
       });
       expect(result.status).toBe(PaymentStatus.REJECTED);
     });
