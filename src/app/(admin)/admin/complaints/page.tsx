@@ -15,13 +15,25 @@ const NEXT_STATUS: Record<string, 'IN_PROGRESS' | 'RESOLVED' | null> = {
   RESOLVED: null,
 };
 
+interface Complaint {
+  id: string;
+  title: string;
+  content: string;
+  status: string;
+  createdAt: string;
+  customer?: {
+    name: string;
+    email: string;
+  };
+}
+
 const NEXT_LABEL: Record<string, string> = {
   OPEN: 'Proses',
   IN_PROGRESS: 'Selesaikan',
 };
 
 export default function AdminComplaintsPage() {
-  const [complaints, setComplaints] = useState<any[]>([]);
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
 
@@ -46,8 +58,8 @@ export default function AdminComplaintsPage() {
       setComplaints((prev) =>
         prev.map((c) => (c.id === id ? { ...c, status: data.status } : c)),
       );
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Gagal memperbarui status');
     } finally {
       setUpdating(null);
     }

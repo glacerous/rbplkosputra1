@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import {
     CreditCard,
     CheckCircle2,
@@ -12,8 +13,27 @@ import {
     ImageIcon,
 } from "lucide-react";
 
+interface Payment {
+    id: string;
+    amount: number;
+    status: string;
+    proofUrl: string | null;
+    createdAt: string;
+    customer: {
+        name: string;
+        email: string;
+    };
+    reservation: {
+        id: string;
+        status: string;
+        room: {
+            number: string;
+        };
+    };
+}
+
 export default function AdminPaymentsPage() {
-    const [payments, setPayments] = useState<any[]>([]);
+    const [payments, setPayments] = useState<Payment[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<"check-in" | "monthly">("check-in");
     const [processingId, setProcessingId] = useState<string | null>(null);
@@ -155,9 +175,13 @@ export default function AdminPaymentsPage() {
                                             onClick={() => setProofModal(payment.proofUrl)}
                                             className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-[#0881A3]/20 hover:border-[#0881A3] transition-colors shrink-0 group relative"
                                         >
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img src={payment.proofUrl} alt="Bukti" className="w-full h-full object-cover" />
-                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold">
+                                            <Image
+                                                src={payment.proofUrl}
+                                                alt="Bukti"
+                                                fill
+                                                className="object-cover"
+                                            />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold z-10">
                                                 Lihat
                                             </div>
                                         </button>
@@ -216,8 +240,14 @@ export default function AdminPaymentsPage() {
                                 <XCircle className="w-6 h-6" />
                             </button>
                         </div>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={proofModal} alt="Bukti transfer" className="w-full max-h-[70vh] object-contain p-4" />
+                        <div className="relative w-full h-[70vh] p-4">
+                            <Image
+                                src={proofModal}
+                                alt="Bukti transfer"
+                                fill
+                                className="object-contain p-4"
+                            />
+                        </div>
                     </div>
                 </div>
             )}

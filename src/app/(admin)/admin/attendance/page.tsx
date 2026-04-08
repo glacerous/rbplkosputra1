@@ -8,8 +8,19 @@ const STATUS_CONFIG = {
   ABSENT: { label: 'Tidak Hadir', className: 'bg-red-100 text-red-700' },
 };
 
+interface Attendance {
+  id: string;
+  status: string;
+  timestamp: string;
+  reason?: string | null;
+  cleaner?: {
+    name: string;
+    email: string;
+  };
+}
+
 export default function AdminAttendancePage() {
-  const [attendances, setAttendances] = useState<any[]>([]);
+  const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

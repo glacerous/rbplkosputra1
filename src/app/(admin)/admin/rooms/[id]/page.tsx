@@ -4,6 +4,7 @@ import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Edit, Trash2, Home, Loader2, Info } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface Room {
   id: string;
@@ -35,8 +36,8 @@ export default function RoomDetailPage({
         if (!res.ok) throw new Error('Kamar tidak ditemukan');
         const data = await res.json();
         setRoom(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Kamar tidak ditemukan');
       } finally {
         setLoading(false);
       }
@@ -53,8 +54,8 @@ export default function RoomDetailPage({
       if (!res.ok) throw new Error('Gagal menghapus kamar');
       router.push('/admin/rooms');
       router.refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Gagal menghapus kamar');
     }
   };
 
@@ -120,11 +121,14 @@ export default function RoomDetailPage({
           <div className="space-y-6 md:col-span-1">
             <div className="flex flex-col items-center space-y-4 overflow-hidden rounded-3xl bg-[#0881A3] p-8 text-center text-white shadow-xl shadow-[#0881A3]/20">
               {room.imageUrl ? (
-                <img
-                  src={room.imageUrl}
-                  alt={`Kamar ${room.number}`}
-                  className="h-32 w-full rounded-2xl object-cover"
-                />
+                <div className="relative h-32 w-full">
+                  <Image
+                    src={room.imageUrl}
+                    alt={`Kamar ${room.number}`}
+                    fill
+                    className="rounded-2xl object-cover"
+                  />
+                </div>
               ) : (
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/20">
                   <Home className="h-10 w-10" />

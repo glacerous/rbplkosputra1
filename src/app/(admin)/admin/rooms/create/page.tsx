@@ -4,11 +4,12 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, Loader2, ImagePlus } from 'lucide-react';
+import Image from 'next/image';
 
 export default function CreateRoomPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<Record<string, string[]> | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const previewUrlRef = useRef<string | null>(null);
@@ -73,8 +74,8 @@ export default function CreateRoomPage() {
 
       router.push('/admin/rooms');
       router.refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Gagal membuat kamar');
     } finally {
       setLoading(false);
     }
@@ -194,11 +195,14 @@ export default function CreateRoomPage() {
             />
           </label>
           {imagePreview && (
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="mt-2 h-40 w-full rounded-2xl object-cover"
-            />
+            <div className="relative mt-2 h-40 w-full overflow-hidden rounded-2xl">
+              <Image
+                src={imagePreview}
+                alt="Preview"
+                fill
+                className="object-cover"
+              />
+            </div>
           )}
         </div>
 

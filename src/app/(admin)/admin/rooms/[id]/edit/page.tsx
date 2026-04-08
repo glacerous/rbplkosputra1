@@ -3,6 +3,7 @@
 import { useEffect, useState, use, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, Save, Loader2, ImagePlus } from 'lucide-react';
 
 export default function EditRoomPage({
@@ -15,7 +16,7 @@ export default function EditRoomPage({
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<Record<string, string[]> | string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
@@ -63,8 +64,8 @@ export default function EditRoomPage({
           status: data.status,
         });
         setExistingImageUrl(data.imageUrl ?? null);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
         setLoading(false);
       }
@@ -105,8 +106,8 @@ export default function EditRoomPage({
 
       router.push('/admin/rooms');
       router.refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setSaving(false);
     }
@@ -156,7 +157,7 @@ export default function EditRoomPage({
                 setFormData({ ...formData, number: e.target.value })
               }
             />
-            {error?.number && (
+            {error && typeof error === 'object' && error.number && (
               <p className="text-xs font-bold text-red-500">
                 {error.number[0]}
               </p>
@@ -176,7 +177,7 @@ export default function EditRoomPage({
                 setFormData({ ...formData, category: e.target.value })
               }
             />
-            {error?.category && (
+            {error && typeof error === 'object' && error.category && (
               <p className="text-xs font-bold text-red-500">
                 {error.category[0]}
               </p>
@@ -200,7 +201,7 @@ export default function EditRoomPage({
                 })
               }
             />
-            {error?.priceMonthly && (
+            {error && typeof error === 'object' && error.priceMonthly && (
               <p className="text-xs font-bold text-red-500">
                 {error.priceMonthly[0]}
               </p>
@@ -239,11 +240,14 @@ export default function EditRoomPage({
               />
             </label>
             {(imagePreview || existingImageUrl) && (
-              <img
-                src={imagePreview ?? existingImageUrl!}
-                alt="Preview"
-                className="mt-2 h-40 w-full rounded-2xl object-cover"
-              />
+              <div className="relative mt-2 h-40 w-full overflow-hidden rounded-2xl">
+                <Image
+                  src={imagePreview ?? existingImageUrl!}
+                  alt="Preview"
+                  fill
+                  className="object-cover"
+                />
+              </div>
             )}
           </div>
 

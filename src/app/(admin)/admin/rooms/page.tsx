@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Plus, Edit, Trash2, Eye, Search, Home } from 'lucide-react';
 
 interface Room {
@@ -26,8 +27,8 @@ export default function AdminRoomsPage() {
       if (!res.ok) throw new Error('Gagal mengambil data kamar');
       const data = await res.json();
       setRooms(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Gagal mengambil data kamar');
     } finally {
       setLoading(false);
     }
@@ -44,8 +45,8 @@ export default function AdminRoomsPage() {
       const res = await fetch(`/api/admin/rooms/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Gagal menghapus kamar');
       setRooms(rooms.filter((room) => room.id !== id));
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Gagal menghapus kamar');
     }
   };
 
@@ -124,11 +125,14 @@ export default function AdminRoomsPage() {
                     >
                       <td className="px-4 py-3">
                         {room.imageUrl ? (
-                          <img
-                            src={room.imageUrl}
-                            alt={`Kamar ${room.number}`}
-                            className="h-10 w-10 rounded-lg object-cover"
-                          />
+                          <div className="relative h-10 w-10">
+                            <Image
+                              src={room.imageUrl}
+                              alt={`Kamar ${room.number}`}
+                              fill
+                              className="rounded-lg object-cover"
+                            />
+                          </div>
                         ) : (
                           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#F9F8ED] text-[#1F4E5F]/20">
                             <Home className="h-5 w-5" />
@@ -142,13 +146,12 @@ export default function AdminRoomsPage() {
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`rounded-full px-3 py-1 text-[10px] font-black tracking-widest uppercase ${
-                            room.status === 'AVAILABLE'
+                          className={`rounded-full px-3 py-1 text-[10px] font-black tracking-widest uppercase ${room.status === 'AVAILABLE'
                               ? 'bg-green-100 text-green-700'
                               : room.status === 'OCCUPIED'
                                 ? 'bg-orange-100 text-orange-700'
                                 : 'bg-red-100 text-red-700'
-                          }`}
+                            }`}
                         >
                           {room.status}
                         </span>

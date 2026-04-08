@@ -234,7 +234,6 @@ export default function OwnerFinanceDashboard() {
                                         dataKey="total"
                                         radius={[8, 8, 8, 8]}
                                         fill="url(#barGradient)"
-                                        onMouseOver={(data, index) => { }}
                                     >
                                         {chartData.map((entry, index) => (
                                             <Cell key={`cell-${index}`} className="transition-all duration-300 hover:opacity-80" />
@@ -303,7 +302,15 @@ export default function OwnerFinanceDashboard() {
     );
 }
 
-function MetricCard({ title, value, icon: Icon, trend, subtitle }: any) {
+interface MetricCardProps {
+    title: string;
+    value: string;
+    icon: React.ElementType;
+    trend?: 'up' | 'down';
+    subtitle: string;
+}
+
+function MetricCard({ title, value, icon: Icon, trend, subtitle }: MetricCardProps) {
     return (
         <div className="rounded-3xl border border-[#F4E7D3] bg-white p-6 shadow-sm transition-all hover:shadow-md">
             <div className="flex items-center justify-between">

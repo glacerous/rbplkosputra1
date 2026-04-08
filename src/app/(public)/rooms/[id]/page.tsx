@@ -2,6 +2,7 @@ import { auth } from '@/server/auth/auth';
 import { prisma } from '@/server/db/prisma';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, CheckCircle2, CreditCard, Info, Phone } from 'lucide-react';
 import ReservationButton from './ReservationButton';
 
@@ -51,10 +52,11 @@ export default async function RoomDetailPage({
         <div className="bg-warm-surface border-primary-dark/10 overflow-hidden rounded-[40px] border shadow-xl">
           <div className="bg-primary-dark/5 relative flex aspect-video items-center justify-center overflow-hidden">
             {room.imageUrl ? (
-              <img
+              <Image
                 src={room.imageUrl}
                 alt={`Kamar ${room.number}`}
-                className="absolute inset-0 h-full w-full object-cover"
+                fill
+                className="object-cover"
               />
             ) : (
               <span className="text-primary-dark/5 text-9xl font-black italic select-none">
@@ -87,10 +89,10 @@ export default async function RoomDetailPage({
                       {f.trim()}
                     </div>
                   )) || (
-                    <span className="text-primary-dark/30 text-sm italic">
-                      Fasilitas standar
-                    </span>
-                  )}
+                      <span className="text-primary-dark/30 text-sm italic">
+                        Fasilitas standar
+                      </span>
+                    )}
                 </div>
               </div>
               <div className="flex flex-col justify-center rounded-[32px] border border-[#F4E7D3] bg-[#F9F8ED]/50 p-6">

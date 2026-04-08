@@ -63,7 +63,7 @@ function LoginForm() {
             } else {
                 router.push("/")
             }
-        } catch (e) {
+        } catch {
             setError("An unexpected error occurred. Please try again.")
             setIsLoading(false)
         }
