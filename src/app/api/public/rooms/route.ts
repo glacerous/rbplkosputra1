@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getRooms } from "@/server/services/room.service";
 import { RoomStatus } from "@prisma/client";
 
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
     try {

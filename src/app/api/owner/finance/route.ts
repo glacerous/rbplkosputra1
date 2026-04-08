@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { requireRole } from '@/server/guards/requireRole';
 import { getMonthlyFinanceSummary } from '@/server/services/finance.service';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
     try {
         // 1. Role-based access control (WAJIB)

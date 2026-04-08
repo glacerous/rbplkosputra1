@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getRooms, createRoom } from '@/server/services/room.service';
+
+export const dynamic = 'force-dynamic';
 import { roomSchema } from '@/server/validators/room.schema';
 import { uploadImage } from '@/server/lib/cloudinary';
 

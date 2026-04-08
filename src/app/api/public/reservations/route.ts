@@ -6,6 +6,8 @@ import {
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
+export const dynamic = 'force-dynamic';
+
 const reservationSchema = z.object({
   roomId: z.string().min(1, 'Room ID is required'),
 });
