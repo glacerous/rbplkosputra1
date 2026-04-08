@@ -12,13 +12,15 @@
     "format": "prettier --write .",
     "prepare": "husky",
     "test:e2e": "playwright test",
-    "test:unit": "vitest run"
+    "test:unit": "vitest run",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "latest",
     "@neondatabase/serverless": "^1.0.2",
     "@prisma/adapter-neon": "^7.4.1",
     "@prisma/adapter-pg": "^7.4.1",
+    "@prisma/client": "7.4.1",
     "@tanstack/react-table": "latest",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "latest",
@@ -39,7 +41,6 @@
   },
   "devDependencies": {
     "@playwright/test": "latest",
-    "@prisma/client": "7.4.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
