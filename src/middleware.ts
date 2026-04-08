@@ -6,6 +6,11 @@ export async function middleware(request: NextRequest) {
     const token = await getToken({ req: request });
     const { pathname } = request.nextUrl;
 
+    // --- LOGGING ---
+    if (pathname.startsWith("/api")) {
+        console.log(`[${new Date().toISOString()}] ${request.method} ${pathname}`);
+    }
+
     // Allow auth-related paths, public files, and the forbidden page
     if (
         pathname.startsWith("/api/auth") ||

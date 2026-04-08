@@ -1,3 +1,5 @@
+import { log } from '../lib/logger';
+
 export class ApiError extends Error {
     public statusCode: number;
 
@@ -5,6 +7,9 @@ export class ApiError extends Error {
         super(message);
         this.name = 'ApiError';
         this.statusCode = statusCode;
+
+        // Log the error
+        log.error(`[ApiError] ${message} (Status: ${statusCode})`);
 
         // Set prototype explicitly for built-in Error extending to work properly in Node/TS
         Object.setPrototypeOf(this, ApiError.prototype);

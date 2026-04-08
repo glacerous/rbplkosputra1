@@ -1,6 +1,7 @@
 import { prisma } from '@/server/db/prisma';
 import { createNotification } from './notification.service';
 import { sendReservationEmail } from '@/server/email/resend';
+import { log } from '@/server/lib/logger';
 
 export async function createReservation(roomId: string, customerId: string) {
   // 1. Check if room exists and is available
@@ -70,7 +71,7 @@ export async function createReservation(roomId: string, customerId: string) {
         to: customer.email,
         customerName: customer.name,
       }),
-    ]).catch(console.error);
+    ]).catch(log.error);
   }
 
   return result;
@@ -111,7 +112,7 @@ export async function checkoutReservation(
     'RESERVATION',
     'Checkout Berhasil',
     'Checkout berhasil',
-  ).catch(console.error);
+  ).catch(log.error);
 }
 
 export async function cancelReservation(
@@ -151,7 +152,7 @@ export async function cancelReservation(
     'RESERVATION',
     'Reservasi Dibatalkan',
     'Reservasi dibatalkan',
-  ).catch(console.error);
+  ).catch(log.error);
 }
 
 export async function getUserReservationHistory(userId: string) {

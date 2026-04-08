@@ -112,3 +112,27 @@ export async function sendComplaintStatusEmail({
     console.error('[Email] Failed:', err);
   }
 }
+
+export async function sendPaymentReminderEmail({
+  to,
+  customerName,
+}: {
+  to: string;
+  customerName: string;
+}) {
+  const resend = getResend();
+  if (!resend) return;
+
+  try {
+    console.log(`[Email] Target: ${to}`);
+    const result = await resend.emails.send({
+      from: 'Kos App <onboarding@resend.dev>',
+      to,
+      subject: 'Pengingat Pembayaran',
+      html: `<p>Halo ${customerName},</p><p>Kami memperingatkan bahwa Anda memiliki reservasi yang belum dibayar. Mohon segera selesaikan pembayaran agar reservasi tidak dibatalkan otomatis.</p>`,
+    });
+    console.log('[Email] Success Result:', result);
+  } catch (err) {
+    console.error('[Email] Failed:', err);
+  }
+}

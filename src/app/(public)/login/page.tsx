@@ -135,9 +135,6 @@ function LoginForm() {
                 </form>
 
                 <div className="text-center space-y-4 pt-2">
-                    <p className="text-sm font-bold text-primary-dark/40">
-                        Lupa password? <span className="text-primary-dark/60 hover:underline cursor-pointer">Hubungi pengelola.</span>
-                    </p>
                     <div className="pt-2 border-t border-primary-dark/10">
                         <p className="text-sm font-normal text-primary-dark/60">
                             Belum punya akun?{" "}
