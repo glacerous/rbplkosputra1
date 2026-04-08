@@ -20,7 +20,15 @@ export const getPrisma = (): PrismaClient => {
         console.warn("[PRISMA] DATABASE_URL is missing. Database access will fail at runtime.");
         // Return a dummy client or throw later when a query is actually made
         // For build time, this prevents a crash during static collection
-        return new PrismaClient();
+        return new Proxy({}, {
+            get() {
+                return new Proxy({}, {
+                    get() {
+                        return () => { throw new Error("DATABASE_URL is missing") };
+                    }
+                });
+            }
+        }) as unknown as PrismaClient;
     }
 
     try {
