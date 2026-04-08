@@ -8,13 +8,20 @@ const STATUS_CONFIG = {
   ABSENT: { label: 'Tidak Hadir', className: 'bg-red-100 text-red-700' },
 };
 
+interface Attendance {
+  id: string;
+  status: string;
+  reason?: string;
+  timestamp: string;
+}
+
 export default function AttendancePage() {
   const [status, setStatus] = useState<'PRESENT' | 'ABSENT'>('PRESENT');
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [attendances, setAttendances] = useState<any[]>([]);
+  const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [loadingList, setLoadingList] = useState(true);
 
   const fetchAttendances = () => {
@@ -46,8 +53,8 @@ export default function AttendancePage() {
       setSuccessMsg('Absensi berhasil dicatat!');
       setReason('');
       fetchAttendances();
-    } catch (err: any) {
-      setErrorMsg(err.message);
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'Terjadi kesalahan');
     } finally {
       setSubmitting(false);
     }
@@ -82,11 +89,10 @@ export default function AttendancePage() {
                 {(['PRESENT', 'ABSENT'] as const).map((s) => (
                   <label
                     key={s}
-                    className={`flex cursor-pointer items-center gap-2 rounded-2xl border px-4 py-3 text-sm font-bold transition-colors ${
-                      status === s
+                    className={`flex cursor-pointer items-center gap-2 rounded-2xl border px-4 py-3 text-sm font-bold transition-colors ${status === s
                         ? 'border-[#0881A3] bg-[#0881A3]/5 text-[#0881A3]'
                         : 'border-[#F4E7D3] bg-[#F9F8ED] text-[#1F4E5F]/60'
-                    }`}
+                      }`}
                   >
                     <input
                       type="radio"

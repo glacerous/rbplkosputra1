@@ -25,8 +25,8 @@ export default function ReservationButton({ roomId }: { roomId: string }) {
             // Success redirect to Home. The home page will detect the PENDING reservation.
             router.push("/");
             router.refresh();
-        } catch (error: any) {
-            alert(error.message);
+        } catch (error: unknown) {
+            alert(error instanceof Error ? error.message : "Terjadi kesalahan");
         } finally {
             setLoading(false);
         }

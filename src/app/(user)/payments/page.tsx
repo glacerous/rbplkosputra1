@@ -32,8 +32,22 @@ const statusConfig: Record<
   },
 };
 
+interface Payment {
+  id: string;
+  amount: number;
+  status: string;
+  proofUrl?: string | null;
+  createdAt: string;
+  confirmedAt?: string | null;
+  reservation?: {
+    room?: {
+      number: string;
+    };
+  };
+}
+
 export default function PaymentsPage() {
-  const [payments, setPayments] = useState<any[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

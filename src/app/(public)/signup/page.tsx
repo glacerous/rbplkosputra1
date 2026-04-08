@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Loader2, Mail, Lock, User, CheckCircle2, AlertCircle } from "lucide-react"
 
@@ -22,7 +21,6 @@ const signupSchema = z.object({
 type SignupFormValues = z.infer<typeof signupSchema>
 
 export default function SignupPage() {
-    const router = useRouter()
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
     const [isLoading, setIsLoading] = useState(false)

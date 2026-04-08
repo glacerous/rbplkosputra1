@@ -8,10 +8,10 @@ const logger = pino({
     base: undefined, // Remove pid and hostname for cleaner logs
 });
 
-export const logBuffer: any[] = [];
+export const logBuffer: Array<{ timestamp: string; level: string; message: string; data?: unknown }> = [];
 const MAX_BUFFER_SIZE = 100;
 
-function addToBuffer(level: string, msg: string, obj?: any) {
+function addToBuffer(level: string, msg: string, obj?: unknown) {
     logBuffer.push({
         timestamp: new Date().toISOString(),
         level,
@@ -24,22 +24,22 @@ function addToBuffer(level: string, msg: string, obj?: any) {
 }
 
 export const log = {
-    info: (msg: string, obj?: any) => {
+    info: (msg: string, obj?: unknown) => {
         addToBuffer("info", msg, obj);
         if (obj) logger.info(obj, msg);
         else logger.info(msg);
     },
-    error: (msg: string, obj?: any) => {
+    error: (msg: string, obj?: unknown) => {
         addToBuffer("error", msg, obj);
         if (obj) logger.error(obj, msg);
         else logger.error(msg);
     },
-    warn: (msg: string, obj?: any) => {
+    warn: (msg: string, obj?: unknown) => {
         addToBuffer("warn", msg, obj);
         if (obj) logger.warn(obj, msg);
         else logger.warn(msg);
     },
-    debug: (msg: string, obj?: any) => {
+    debug: (msg: string, obj?: unknown) => {
         addToBuffer("debug", msg, obj);
         if (obj) logger.debug(obj, msg);
         else logger.debug(msg);

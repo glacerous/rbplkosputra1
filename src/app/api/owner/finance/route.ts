@@ -16,11 +16,13 @@ export async function GET(request: Request) {
         const data = await getMonthlyFinanceSummary(year);
 
         return NextResponse.json(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('API Error in /api/owner/finance:', error);
 
-        if (error.message.includes('Unauthorized') || error.message.includes('Forbidden')) {
-            return NextResponse.json({ error: error.message }, { status: 403 });
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+        if (errorMessage.includes('Unauthorized') || errorMessage.includes('Forbidden')) {
+            return NextResponse.json({ error: errorMessage }, { status: 403 });
         }
 
         return NextResponse.json(

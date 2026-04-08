@@ -12,8 +12,8 @@ export async function GET() {
         const transactions = await getTransactionReport();
 
         return NextResponse.json(transactions, { status: 200 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Fetch Transaction Report Error:", error);
-        return NextResponse.json({ message: error.message || "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ message: error instanceof Error ? error.message : "Internal Server Error" }, { status: 500 });
     }
 }

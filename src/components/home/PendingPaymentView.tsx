@@ -13,8 +13,20 @@ import {
   ImageIcon,
 } from 'lucide-react';
 
+interface Reservation {
+  id: string;
+  room?: {
+    number: string;
+    priceMonthly: number;
+  };
+  payments?: Array<{
+    id: string;
+    proofUrl?: string | null;
+  }>;
+}
+
 interface PendingPaymentViewProps {
-  reservation: any;
+  reservation: Reservation;
   name: string;
 }
 
@@ -40,8 +52,8 @@ export default function PendingPaymentView({
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Gagal membatalkan');
       window.location.reload();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Terjadi kesalahan');
     } finally {
       setCancelling(false);
     }
@@ -74,6 +86,8 @@ export default function PendingPaymentView({
       const formData = new FormData();
       formData.append('proof', file);
 
+      if (!latestPayment?.id) throw new Error('Pembayaran tidak ditemukan');
+
       const res = await fetch(
         `/api/public/payments/${latestPayment.id}/proof`,
         {
@@ -87,8 +101,8 @@ export default function PendingPaymentView({
 
       setProofUrl(data.proofUrl);
       router.refresh();
-    } catch (err: any) {
-      setUploadError(err.message);
+    } catch (err: unknown) {
+      setUploadError(err instanceof Error ? err.message : 'Terjadi kesalahan');
     } finally {
       setUploading(false);
     }

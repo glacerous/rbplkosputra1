@@ -15,9 +15,9 @@ export async function GET(
     const { id } = await params;
     const room = await getRoomById(id);
     return NextResponse.json(room);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API_ADMIN_ROOM_ID_GET]', error);
-    if (error.message === 'Room not found') {
+    if (error instanceof Error && error.message === 'Room not found') {
       return NextResponse.json({ message: 'Room not found' }, { status: 404 });
     }
     return NextResponse.json(
@@ -81,12 +81,12 @@ export async function PUT(
 
     const room = await updateRoom(id, result.data);
     return NextResponse.json(room);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API_ADMIN_ROOM_ID_PUT]', error);
-    if (error.message === 'Room not found') {
+    if (error instanceof Error && error.message === 'Room not found') {
       return NextResponse.json({ message: 'Room not found' }, { status: 404 });
     }
-    if (error.code === 'P2002') {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
       return NextResponse.json(
         { message: 'Room number already exists' },
         { status: 400 },
@@ -107,9 +107,9 @@ export async function DELETE(
     const { id } = await params;
     await deleteRoom(id);
     return new NextResponse(null, { status: 204 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API_ADMIN_ROOM_ID_DELETE]', error);
-    if (error.message === 'Room not found') {
+    if (error instanceof Error && error.message === 'Room not found') {
       return NextResponse.json({ message: 'Room not found' }, { status: 404 });
     }
     return NextResponse.json(

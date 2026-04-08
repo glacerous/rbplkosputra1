@@ -65,9 +65,9 @@ export async function POST(req: Request) {
 
     const room = await createRoom(result.data);
     return NextResponse.json(room, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API_ADMIN_ROOMS_POST]', error);
-    if (error.code === 'P2002') {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
       return NextResponse.json(
         { message: 'Room number already exists' },
         { status: 400 },

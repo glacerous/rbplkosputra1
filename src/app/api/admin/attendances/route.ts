@@ -13,10 +13,10 @@ export async function GET() {
     }
     const attendances = await getAllAttendances();
     return NextResponse.json(attendances, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Fetch All Attendances Error:', error);
     return NextResponse.json(
-      { message: error.message || 'Internal Server Error' },
+      { message: error instanceof Error ? error.message : 'Internal Server Error' },
       { status: 500 },
     );
   }

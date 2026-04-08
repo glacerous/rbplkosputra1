@@ -14,10 +14,10 @@ export async function GET() {
 
     const complaints = await getAllComplaints();
     return NextResponse.json(complaints, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Fetch All Complaints Error:', error);
     return NextResponse.json(
-      { message: error.message || 'Internal Server Error' },
+      { message: error instanceof Error ? error.message : 'Internal Server Error' },
       { status: 500 },
     );
   }

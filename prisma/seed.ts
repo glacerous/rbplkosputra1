@@ -9,7 +9,7 @@ neonConfig.webSocketConstructor = ws;
 
 console.log('DATABASE_URL length:', process.env.DATABASE_URL?.length || 0);
 const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
-// @ts-ignore - PrismaNeon constructor type mismatch with Neon serverless Pool
+// @ts-expect-error - PrismaNeon constructor type mismatch with Neon serverless Pool
 const adapter = new PrismaNeon(pool as unknown as Parameters<typeof PrismaNeon>[0]);
 
 const prisma = new PrismaClient({ adapter });

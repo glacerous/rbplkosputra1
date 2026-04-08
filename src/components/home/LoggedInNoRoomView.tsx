@@ -2,8 +2,17 @@ import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 
+interface Room {
+  id: string;
+  number: string;
+  category: string;
+  priceMonthly: number;
+  imageUrl?: string | null;
+  facilities?: string | null;
+}
+
 export default function LoggedInNoRoomView({ name }: { name: string }) {
-  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [recommendations, setRecommendations] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

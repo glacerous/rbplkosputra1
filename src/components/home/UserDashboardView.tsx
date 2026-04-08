@@ -70,8 +70,25 @@ function CountdownTimer({ targetDate }: { targetDate: Date }) {
   );
 }
 
+interface Reservation {
+  id: string;
+  checkInAt?: string | null;
+  createdAt: string;
+  room?: {
+    number: string;
+    category?: string;
+    imageUrl?: string | null;
+  };
+  payments?: Array<{
+    id: string;
+    amount: number;
+    status: string;
+    proofUrl?: string | null;
+  }>;
+}
+
 interface UserDashboardViewProps {
-  reservation: any;
+  reservation: Reservation;
   name: string;
 }
 
@@ -84,7 +101,7 @@ export default function UserDashboardView({
   const router = useRouter();
   const [checkingOut, setCheckingOut] = useState(false);
   const [creatingPayment, setCreatingPayment] = useState(false);
-  const [selectedPayment, setSelectedPayment] = useState<any>(null);
+  const [selectedPayment, setSelectedPayment] = useState<NonNullable<Reservation['payments']>[number] | null>(null);
 
   // Calculate next due date (monthly from check-in)
   const checkInDate = new Date(reservation.checkInAt || reservation.createdAt);
@@ -116,8 +133,8 @@ export default function UserDashboardView({
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Gagal membuat tagihan');
       setSelectedPayment(data);
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Terjadi kesalahan');
     } finally {
       setCreatingPayment(false);
     }
@@ -150,8 +167,8 @@ export default function UserDashboardView({
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Gagal checkout');
       window.location.href = '/';
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Terjadi kesalahan');
     } finally {
       setCheckingOut(false);
     }

@@ -16,8 +16,8 @@ export async function PATCH(
         await checkoutReservation(id, session.user.id);
 
         return NextResponse.json({ message: "Checkout berhasil" }, { status: 200 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Checkout Error:", error);
-        return NextResponse.json({ message: error.message || "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ message: error instanceof Error ? error.message : "Internal Server Error" }, { status: 500 });
     }
 }

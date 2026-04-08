@@ -9,8 +9,26 @@ import {
     Calendar,
 } from "lucide-react";
 
+interface Transaction {
+    id: string;
+    amount?: number;
+    total?: number;
+    createdAt: string;
+    payment?: {
+        customer?: {
+            name: string;
+            email: string;
+        };
+        reservation?: {
+            room?: {
+                number: string;
+            };
+        };
+    };
+}
+
 export default function AdminTransactionsPage() {
-    const [transactions, setTransactions] = useState<any[]>([]);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {

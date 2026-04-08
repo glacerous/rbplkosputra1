@@ -17,8 +17,8 @@ export async function POST(req: Request) {
         const payment = await createMonthlyPayment(reservationId, session.user.id);
 
         return NextResponse.json(payment, { status: 201 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Create Monthly Payment Error:", error);
-        return NextResponse.json({ message: error.message || "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ message: error instanceof Error ? error.message : "Internal Server Error" }, { status: 500 });
     }
 }

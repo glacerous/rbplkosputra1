@@ -49,8 +49,8 @@ export default function OwnerFinanceDashboard() {
             }
             const result = await res.json();
             setData(result);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Terjadi kesalahan');
         } finally {
             setLoading(false);
         }

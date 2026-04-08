@@ -19,9 +19,9 @@ export async function PATCH(
       { message: 'Reservasi berhasil dibatalkan' },
       { status: 200 },
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { message: error.message || 'Internal Server Error' },
+      { message: error instanceof Error ? error.message : 'Internal Server Error' },
       { status: 400 },
     );
   }

@@ -12,8 +12,8 @@ export async function GET() {
         const payments = await getUserPayments(session.user.id);
 
         return NextResponse.json(payments, { status: 200 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Fetch User Payments Error:", error);
-        return NextResponse.json({ message: error.message || "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ message: error instanceof Error ? error.message : "Internal Server Error" }, { status: 500 });
     }
 }

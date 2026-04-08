@@ -13,7 +13,7 @@ export async function GET() {
     const session = await requireUser();
     const complaints = await getUserComplaints(session.user.id);
     return NextResponse.json(complaints, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof ApiError) {
       return NextResponse.json({ message: error.message }, { status: error.statusCode });
     }
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     const complaint = await createComplaint(session.user.id, parsedData);
 
     return NextResponse.json(complaint, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof ApiError) {
       return NextResponse.json({ message: error.message }, { status: error.statusCode });
     }

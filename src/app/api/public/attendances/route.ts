@@ -22,10 +22,10 @@ export async function POST(req: NextRequest) {
     }
     const attendance = await submitAttendance(session.user.id, parsed.data);
     return NextResponse.json(attendance, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Submit Attendance Error:', error);
     return NextResponse.json(
-      { message: error.message || 'Internal Server Error' },
+      { message: error instanceof Error ? error.message : 'Internal Server Error' },
       { status: 500 },
     );
   }
@@ -39,10 +39,10 @@ export async function GET() {
     }
     const attendances = await getCleanerAttendances(session.user.id);
     return NextResponse.json(attendances, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Fetch Attendances Error:', error);
     return NextResponse.json(
-      { message: error.message || 'Internal Server Error' },
+      { message: error instanceof Error ? error.message : 'Internal Server Error' },
       { status: 500 },
     );
   }

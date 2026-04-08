@@ -32,9 +32,9 @@ export async function PUT(
 
         const user = await adminUpdateUser(id, result.data);
         return NextResponse.json(user);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("[API_ADMIN_USER_ID_PUT]", error);
-        if (error.code === "P2025") {
+        if (error && typeof error === "object" && "code" in error && error.code === "P2025") {
             return NextResponse.json({ message: "User not found" }, { status: 404 });
         }
         return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
@@ -54,9 +54,9 @@ export async function DELETE(
         const { id } = await params;
         await deleteUser(id);
         return new NextResponse(null, { status: 204 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("[API_ADMIN_USER_ID_DELETE]", error);
-        if (error.code === "P2025") {
+        if (error && typeof error === "object" && "code" in error && error.code === "P2025") {
             return NextResponse.json({ message: "User not found" }, { status: 404 });
         }
         return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });

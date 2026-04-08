@@ -18,9 +18,9 @@ export async function GET() {
     }
     const reservations = await getUserReservationHistory(session.user.id);
     return NextResponse.json(reservations);
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { message: error.message || 'Internal Server Error' },
+      { message: error instanceof Error ? error.message : 'Internal Server Error' },
       { status: 500 },
     );
   }
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     const result = await createReservation(roomId, session.user.id);
 
     return NextResponse.json(result, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Reservation Error:', error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       );
     }
     return NextResponse.json(
-      { message: error.message || 'Internal Server Error' },
+      { message: error instanceof Error ? error.message : 'Internal Server Error' },
       { status: 500 },
     );
   }

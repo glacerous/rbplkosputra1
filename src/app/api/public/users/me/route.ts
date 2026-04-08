@@ -77,9 +77,9 @@ export async function PATCH(req: Request) {
       name: updated.name,
       email: updated.email,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { message: error.message || 'Internal Server Error' },
+      { message: error instanceof Error ? error.message : 'Internal Server Error' },
       { status: 500 },
     );
   }

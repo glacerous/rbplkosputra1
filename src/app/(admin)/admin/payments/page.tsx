@@ -66,8 +66,8 @@ export default function AdminPaymentsPage() {
             const res = await fetch(`/api/admin/payments/${id}/confirm`, { method: "PATCH" });
             if (!res.ok) throw new Error("Gagal mengonfirmasi");
             await fetchPayments();
-        } catch (error: any) {
-            alert(error.message);
+        } catch (error: unknown) {
+            alert(error instanceof Error ? error.message : "Terjadi kesalahan");
         } finally {
             setProcessingId(null);
         }
@@ -80,8 +80,8 @@ export default function AdminPaymentsPage() {
             const res = await fetch(`/api/admin/payments/${id}/reject`, { method: "PATCH" });
             if (!res.ok) throw new Error("Gagal menolak pembayaran");
             await fetchPayments();
-        } catch (error: any) {
-            alert(error.message);
+        } catch (error: unknown) {
+            alert(error instanceof Error ? error.message : "Terjadi kesalahan");
         } finally {
             setProcessingId(null);
         }

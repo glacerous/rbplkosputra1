@@ -62,7 +62,7 @@ export async function expireReservations() {
 
         log.info(`Successfully expired ${expiredReservations.length} reservations.`);
         return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
         log.error('Error during expireReservations job:', error);
         throw error;
     }

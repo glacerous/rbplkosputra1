@@ -7,7 +7,7 @@ const { Pool } = pg
 
 const GLOBAL_KEY = "PRISMA_SINGLETON_FINAL"
 const globalForPrisma = globalThis as unknown as {
-    [GLOBAL_KEY]?: any
+    [GLOBAL_KEY]?: PrismaClient
 }
 
 export const getPrisma = (): PrismaClient => {

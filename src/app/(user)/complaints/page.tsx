@@ -25,9 +25,25 @@ const STATUS_CONFIG = {
   RESOLVED: { label: 'Selesai', className: 'bg-green-100 text-green-700' },
 };
 
+interface Complaint {
+  id: string;
+  title: string;
+  content: string;
+  status: string;
+  createdAt: string;
+}
+
+interface Reservation {
+  id: string;
+  status: string;
+  room?: {
+    number: string;
+  };
+}
+
 export default function ComplaintsPage() {
-  const [complaints, setComplaints] = useState<any[]>([]);
-  const [reservations, setReservations] = useState<any[]>([]);
+  const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -70,8 +86,8 @@ export default function ComplaintsPage() {
       reset();
       setSubmitSuccess(true);
       fetchComplaints();
-    } catch (err: any) {
-      setSubmitError(err.message);
+    } catch (err: unknown) {
+      setSubmitError(err instanceof Error ? err.message : 'Terjadi kesalahan');
     }
   };
 
@@ -143,7 +159,7 @@ export default function ComplaintsPage() {
                   className="w-full rounded-2xl border border-[#F4E7D3] bg-[#F9F8ED] px-4 py-3 text-sm font-medium text-[#1F4E5F] transition-colors outline-none focus:border-[#0881A3]"
                 >
                   <option value="">-- Tidak terkait reservasi --</option>
-                  {reservations.map((r: any) => (
+                  {reservations.map((r: Reservation) => (
                     <option key={r.id} value={r.id}>
                       Kamar {r.room?.number} ({r.status})
                     </option>

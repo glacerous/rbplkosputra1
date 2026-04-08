@@ -66,8 +66,8 @@ export default function UsersPage() {
         ),
       );
       setEditingId(null);
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Terjadi kesalahan');
     } finally {
       setSaving(false);
     }
@@ -82,8 +82,8 @@ export default function UsersPage() {
         throw new Error(data.message || 'Gagal menghapus user');
       }
       setUsers(users.filter((u) => u.id !== id));
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Terjadi kesalahan');
     }
   };
 

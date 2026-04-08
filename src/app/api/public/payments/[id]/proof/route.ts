@@ -34,8 +34,8 @@ export async function POST(
         const payment = await uploadPaymentProof(id, session.user.id, proofUrl);
 
         return NextResponse.json(payment, { status: 200 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Proof Upload Error:", error);
-        return NextResponse.json({ message: error.message || "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ message: error instanceof Error ? error.message : "Internal Server Error" }, { status: 500 });
     }
 }

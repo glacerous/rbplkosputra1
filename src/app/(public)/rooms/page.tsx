@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import Image from 'next/image';
 import RoomsListSkeleton from '@/components/skeletons/RoomsListSkeleton';
 
 interface Room {
@@ -55,10 +56,11 @@ export default function RoomsPage() {
             >
               <div className="bg-primary-dark/5 relative flex aspect-[16/10] items-center justify-center overflow-hidden">
                 {room.imageUrl ? (
-                  <img
+                  <Image
                     src={room.imageUrl}
                     alt={`Kamar ${room.number}`}
-                    className="absolute inset-0 h-full w-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 ) : (
                   <span className="text-primary-dark/10 text-6xl font-black italic select-none">
@@ -69,8 +71,8 @@ export default function RoomsPage() {
                 <div className="absolute top-4 right-4">
                   <span
                     className={`rounded-full px-3 py-1 text-[10px] font-bold tracking-wider uppercase ${room.status === 'AVAILABLE'
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-red-100 text-red-700'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : 'bg-red-100 text-red-700'
                       }`}
                   >
                     {room.status === 'AVAILABLE' ? 'Tersedia' : 'Terisi'}
@@ -126,8 +128,8 @@ export default function RoomsPage() {
                       room.status !== 'AVAILABLE' && e.preventDefault()
                     }
                     className={`block w-full rounded-xl border-2 py-3 text-center text-sm font-bold transition-all ${room.status === 'AVAILABLE'
-                        ? 'bg-accent-color border-accent-color hover:text-accent-color text-white hover:bg-white'
-                        : 'bg-primary-dark/10 text-primary-dark/30 cursor-not-allowed border-transparent'
+                      ? 'bg-accent-color border-accent-color hover:text-accent-color text-white hover:bg-white'
+                      : 'bg-primary-dark/10 text-primary-dark/30 cursor-not-allowed border-transparent'
                       }`}
                   >
                     {room.status === 'AVAILABLE'

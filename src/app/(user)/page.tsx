@@ -8,15 +8,23 @@ import PendingPaymentView from '@/components/home/PendingPaymentView';
 import UserDashboardView from '@/components/home/UserDashboardView';
 import CleanerDashboardView from '@/components/home/CleanerDashboardView';
 import { Loader2 } from 'lucide-react';
+import { Role } from '@prisma/client';
+
+interface CustomUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  role: Role;
+}
 
 export default function Home() {
   const { data: session, status } = useSession();
-  const [activeReservation, setActiveReservation] = useState<any>(null);
+  const [activeReservation, setActiveReservation] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (status === 'authenticated') {
-      if ((session?.user as any)?.role === 'CLEANER') {
+      if ((session?.user as unknown as CustomUser)?.role === 'CLEANER') {
         setLoading(false);
         return;
       }
@@ -46,7 +54,7 @@ export default function Home() {
 
   const name = session.user.name ?? '';
 
-  if (!loading && (session?.user as any)?.role === 'CLEANER') {
+  if (!loading && (session?.user as unknown as CustomUser)?.role === 'CLEANER') {
     return <CleanerDashboardView name={name} />;
   }
 
@@ -54,9 +62,9 @@ export default function Home() {
     return <LoggedInNoRoomView name={name} />;
   }
 
-  if (activeReservation.status === 'RESERVED') {
-    return <PendingPaymentView reservation={activeReservation} name={name} />;
+  if (activeReservation?.status === 'RESERVED') {
+    return <PendingPaymentView reservation={activeReservation as any} name={name} />;
   }
 
-  return <UserDashboardView reservation={activeReservation} name={name} />;
+  return <UserDashboardView reservation={activeReservation as any} name={name} />;
 }

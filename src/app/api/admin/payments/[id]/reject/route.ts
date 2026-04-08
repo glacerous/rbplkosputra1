@@ -16,8 +16,8 @@ export async function PATCH(
         const result = await rejectPayment(id);
 
         return NextResponse.json(result, { status: 200 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Payment Rejection Error:", error);
-        return NextResponse.json({ message: error.message || "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ message: error instanceof Error ? error.message : "Internal Server Error" }, { status: 500 });
     }
 }

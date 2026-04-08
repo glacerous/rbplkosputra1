@@ -51,7 +51,7 @@ export async function sendPaymentReminders() {
         const successCount = results.filter((r) => r.success).length;
 
         log.info(`Successfully sent ${successCount}/${pendingReservations.length} payment reminders.`);
-    } catch (error: any) {
+    } catch (error: unknown) {
         log.error('Error during sendPaymentReminders job:', error);
         throw error;
     }

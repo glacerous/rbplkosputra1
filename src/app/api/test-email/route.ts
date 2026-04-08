@@ -1,5 +1,5 @@
 import { sendReservationEmail } from '@/server/email/resend';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
     if (process.env.NODE_ENV !== 'development') {
@@ -20,11 +20,11 @@ export async function GET() {
             status: 'success',
             message: `Email test triggered to ${testTarget}. Check inbox/spam.`
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('[Test Email API] Error:', error);
         return NextResponse.json({
             status: 'error',
-            message: error.message
+            message: error instanceof Error ? error.message : 'Unknown error'
         }, { status: 500 });
     }
 }

@@ -14,10 +14,10 @@ export async function PATCH(
     const { id } = await params;
     const notification = await markNotificationRead(id, session.user.id);
     return NextResponse.json(notification, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Mark Notification Read Error:', error);
     return NextResponse.json(
-      { message: error.message || 'Internal Server Error' },
+      { message: error instanceof Error ? error.message : 'Internal Server Error' },
       { status: 500 },
     );
   }

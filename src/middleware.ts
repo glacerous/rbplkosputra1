@@ -28,7 +28,7 @@ export async function middleware(request: NextRequest) {
         if (!token) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
-        if ((token as any).role !== "ADMIN") {
+        if (token.role !== "ADMIN") {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
     }
@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
         if (!token) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
-        if ((token as any).role !== "OWNER") {
+        if (token.role !== "OWNER") {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
     }
@@ -55,7 +55,7 @@ export async function middleware(request: NextRequest) {
         if (!token) {
             return NextResponse.redirect(new URL("/login", request.url));
         }
-        if ((token as any).role !== "ADMIN") {
+        if (token.role !== "ADMIN") {
             return NextResponse.redirect(new URL("/403", request.url));
         }
     }
@@ -65,7 +65,7 @@ export async function middleware(request: NextRequest) {
         if (!token) {
             return NextResponse.redirect(new URL("/login", request.url));
         }
-        if ((token as any).role !== "OWNER") {
+        if (token.role !== "OWNER") {
             return NextResponse.redirect(new URL("/403", request.url));
         }
     }

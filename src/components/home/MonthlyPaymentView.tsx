@@ -12,9 +12,23 @@ import {
     ArrowLeft,
 } from 'lucide-react';
 
+interface Reservation {
+    id: string;
+    room?: {
+        number: string;
+    };
+}
+
+interface Payment {
+    id: string;
+    amount: number;
+    status: string;
+    proofUrl?: string | null;
+}
+
 interface MonthlyPaymentViewProps {
-    reservation: any;
-    payment: any;
+    reservation: Reservation;
+    payment: Payment;
     name: string;
     onBack: () => void;
 }
@@ -68,8 +82,8 @@ export default function MonthlyPaymentView({
 
             setProofUrl(data.proofUrl);
             router.refresh();
-        } catch (err: any) {
-            setUploadError(err.message);
+        } catch (err: unknown) {
+            setUploadError(err instanceof Error ? err.message : 'Terjadi kesalahan');
         } finally {
             setUploading(false);
         }
