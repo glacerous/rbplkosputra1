@@ -51,7 +51,7 @@ export default function RoomsPage() {
           {rooms.map((room) => (
             <div
               key={room.id}
-              className="group bg-warm-surface border-primary-dark/10 relative overflow-hidden rounded-2xl border shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group bg-warm-surface border-primary-dark/10 relative flex flex-col overflow-hidden rounded-2xl border shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="bg-primary-dark/5 relative flex aspect-[16/10] items-center justify-center overflow-hidden">
                 {room.imageUrl ? (
@@ -68,18 +68,17 @@ export default function RoomsPage() {
                 <div className="from-warm-surface absolute inset-0 bg-gradient-to-t to-transparent opacity-60" />
                 <div className="absolute top-4 right-4">
                   <span
-                    className={`rounded-full px-3 py-1 text-[10px] font-bold tracking-wider uppercase ${
-                      room.status === 'AVAILABLE'
+                    className={`rounded-full px-3 py-1 text-[10px] font-bold tracking-wider uppercase ${room.status === 'AVAILABLE'
                         ? 'bg-emerald-100 text-emerald-700'
                         : 'bg-red-100 text-red-700'
-                    }`}
+                      }`}
                   >
                     {room.status === 'AVAILABLE' ? 'Tersedia' : 'Terisi'}
                   </span>
                 </div>
               </div>
 
-              <div className="p-6">
+              <div className="flex flex-1 flex-col p-6">
                 <div className="mb-4 flex items-start justify-between">
                   <div>
                     <h2 className="mb-1 text-xl font-bold">
@@ -99,7 +98,7 @@ export default function RoomsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="flex flex-1 flex-col justify-between space-y-4">
                   <div className="flex flex-wrap gap-2">
                     {room.facilities?.split(',').map((f, i) => (
                       <span
@@ -109,10 +108,10 @@ export default function RoomsPage() {
                         {f.trim()}
                       </span>
                     )) || (
-                      <span className="text-primary-dark/20 text-xs italic">
-                        Fasilitas standar
-                      </span>
-                    )}
+                        <span className="text-primary-dark/20 text-xs italic">
+                          Fasilitas standar
+                        </span>
+                      )}
                   </div>
 
                   <Link
@@ -126,11 +125,10 @@ export default function RoomsPage() {
                     onClick={(e) =>
                       room.status !== 'AVAILABLE' && e.preventDefault()
                     }
-                    className={`block w-full rounded-xl border-2 py-3 text-center text-sm font-bold transition-all ${
-                      room.status === 'AVAILABLE'
+                    className={`block w-full rounded-xl border-2 py-3 text-center text-sm font-bold transition-all ${room.status === 'AVAILABLE'
                         ? 'bg-accent-color border-accent-color hover:text-accent-color text-white hover:bg-white'
                         : 'bg-primary-dark/10 text-primary-dark/30 cursor-not-allowed border-transparent'
-                    }`}
+                      }`}
                   >
                     {room.status === 'AVAILABLE'
                       ? 'Booking Sekarang'

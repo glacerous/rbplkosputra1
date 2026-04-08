@@ -149,7 +149,7 @@ export default function UserDashboardView({
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Gagal checkout');
-      router.refresh();
+      window.location.href = '/';
     } catch (err: any) {
       alert(err.message);
     } finally {

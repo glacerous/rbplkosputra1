@@ -1,7 +1,21 @@
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
+import { useEffect, useState } from 'react';
 
 export default function LoggedInNoRoomView({ name }: { name: string }) {
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/public/rooms?status=AVAILABLE')
+      .then((res) => res.json())
+      .then((data) => {
+        setRecommendations(data.slice(0, 2));
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
   return (
     <div className="bg-surface text-primary-dark pb-safe-bottom min-h-screen">
       <div className="mx-auto max-w-md px-6 pt-8 text-center sm:pt-12">
@@ -58,29 +72,43 @@ export default function LoggedInNoRoomView({ name }: { name: string }) {
           <h2 className="mb-4 text-center text-[16px] font-bold tracking-widest uppercase opacity-40">
             Rekomendasi Kamar
           </h2>
-          {[1, 2].map((i) => (
-            <div
-              key={i}
-              className="bg-warm-surface border-primary-dark/10 hover:bg-warm-surface/80 flex items-center gap-4 rounded-xl border p-4 shadow-sm transition-colors"
-            >
-              <div className="bg-primary-dark/5 border-primary-dark/5 flex h-16 w-16 items-center justify-center rounded-lg border">
-                <span className="caption text-primary-dark/20 text-center leading-none font-bold">
-                  A-{100 + i}
-                </span>
-              </div>
-              <div className="flex-1">
-                <div className="text-primary-dark text-[16px] font-bold">
-                  Kamar A-{100 + i} Standard
-                </div>
-                <div className="caption text-primary-dark/50">
-                  Siap huni • Lantai {i}
-                </div>
-              </div>
-              <div className="text-accent-color text-[16px] font-bold">
-                Rp 1.5M
-              </div>
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-24 w-full animate-pulse rounded-xl bg-warm-surface border border-primary-dark/5" />
+              ))}
             </div>
-          ))}
+          ) : recommendations.length === 0 ? (
+            <p className="text-primary-dark/30 text-center text-sm italic">Belum ada kamar yang tersedia saat ini.</p>
+          ) : (
+            recommendations.map((room) => (
+              <div
+                key={room.id}
+                className="bg-warm-surface border-primary-dark/10 hover:bg-warm-surface/80 flex items-center gap-4 rounded-xl border p-4 shadow-sm transition-colors"
+              >
+                <div className="bg-primary-dark/5 border-primary-dark/5 flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg border">
+                  {room.imageUrl ? (
+                    <img src={room.imageUrl} alt={room.number} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="caption text-primary-dark/20 text-center leading-none font-bold">
+                      {room.number}
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <div className="text-primary-dark text-[16px] font-bold">
+                    Kamar {room.number} {room.category}
+                  </div>
+                  <div className="caption text-primary-dark/50">
+                    Siap huni • {room.facilities?.split(',')[0] || 'Standar'}
+                  </div>
+                </div>
+                <div className="text-accent-color text-[16px] font-bold">
+                  Rp {(room.priceMonthly / 1000000).toFixed(1)}jt
+                </div>
+              </div>
+            ))
+          )}
         </section>
 
         <p className="caption text-primary-dark/30 mt-8 mb-4 px-8">
