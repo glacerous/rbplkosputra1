@@ -145,27 +145,6 @@ function LoginForm() {
                     </div>
                 </div>
 
-                {/* TEST ACCESS BUTTONS - TEMPORARY */}
-                <div className="pt-6 mt-6 border-t border-dashed border-primary-dark/10">
-                    <p className="text-[10px] font-bold uppercase text-primary-dark/30 tracking-widest text-center mb-4">Akses Uji Coba (Temporary)</p>
-                    <div className="grid grid-cols-2 gap-2">
-                        {[
-                            { role: "ADMIN", email: "admin@example.com", pass: "Admin123!", color: "bg-red-50 text-red-700 border-red-100" },
-                            { role: "OWNER", email: "owner@example.com", pass: "Owner123!", color: "bg-amber-50 text-amber-700 border-amber-100" },
-                            { role: "CLEANER", email: "cleaner@example.com", pass: "Cleaner123!", color: "bg-emerald-50 text-emerald-700 border-emerald-100" },
-                            { role: "TENANT", email: "customer@example.com", pass: "Customer123!", color: "bg-blue-50 text-blue-700 border-blue-100" },
-                        ].map((test) => (
-                            <button
-                                key={test.role}
-                                type="button"
-                                onClick={() => onSubmit({ email: test.email, password: test.pass })}
-                                className={`py-2 px-3 rounded-xl border text-[10px] font-black tracking-tight transition-all active:scale-95 hover:brightness-95 ${test.color}`}
-                            >
-                                {test.role}
-                            </button>
-                        ))}
-                    </div>
-                </div>
             </div>
         </div>
     )
