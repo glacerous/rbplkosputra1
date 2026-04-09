@@ -23,6 +23,7 @@ RUN npm install -g pnpm
 
 # Set build-time env vars if necessary
 ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV production
 
 RUN pnpm build
 

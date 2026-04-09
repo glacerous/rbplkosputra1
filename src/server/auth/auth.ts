@@ -1,4 +1,3 @@
-import "dotenv/config"
 import { NextAuthOptions, getServerSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { getUserByEmail } from "@/server/services/user.service"
